@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -19,6 +20,15 @@ type stubRecommendationRepo struct {
 	preferredCats   []string
 	interactedIDs   []uint64
 	publishedActs   []domain.Activity
+	errHot          error
+	errFresh        error
+	errBehavior     error
+	errPreferred    error
+	errSimilar      error
+	errInteracted   error
+	errPublished    error
+	errUpsert       error
+	errRank         error
 	hotCalls        int
 	freshCalls      int
 	similarCalls    int
@@ -29,6 +39,9 @@ type stubRecommendationRepo struct {
 
 func (s *stubRecommendationRepo) ListHotActivities(limit, offset int) ([]repository.RecommendationItem, error) {
 	s.hotCalls++
+	if s.errHot != nil {
+		return nil, s.errHot
+	}
 	if offset >= len(s.hotItems) {
 		return []repository.RecommendationItem{}, nil
 	}
@@ -41,6 +54,9 @@ func (s *stubRecommendationRepo) ListHotActivities(limit, offset int) ([]reposit
 
 func (s *stubRecommendationRepo) ListFreshActivities(limit int) ([]repository.RecommendationItem, error) {
 	s.freshCalls++
+	if s.errFresh != nil {
+		return nil, s.errFresh
+	}
 	if limit > len(s.freshItems) {
 		limit = len(s.freshItems)
 	}
@@ -48,10 +64,16 @@ func (s *stubRecommendationRepo) ListFreshActivities(limit int) ([]repository.Re
 }
 
 func (s *stubRecommendationRepo) CountUserBehaviors(userID uint64) (int64, error) {
+	if s.errBehavior != nil {
+		return 0, s.errBehavior
+	}
 	return s.behaviorCount, nil
 }
 
 func (s *stubRecommendationRepo) ListUserInteractedActivityIDs(userID uint64, limit int) ([]uint64, error) {
+	if s.errInteracted != nil {
+		return nil, s.errInteracted
+	}
 	if limit > len(s.interactedIDs) {
 		limit = len(s.interactedIDs)
 	}
@@ -59,6 +81,9 @@ func (s *stubRecommendationRepo) ListUserInteractedActivityIDs(userID uint64, li
 }
 
 func (s *stubRecommendationRepo) ListPreferredCategories(userID uint64, limit int) ([]string, error) {
+	if s.errPreferred != nil {
+		return nil, s.errPreferred
+	}
 	if limit > len(s.preferredCats) {
 		limit = len(s.preferredCats)
 	}
@@ -75,6 +100,9 @@ func (s *stubRecommendationRepo) ListHotActivitiesByCategories(categories []stri
 
 func (s *stubRecommendationRepo) ListSimilarActivitiesBySeed(seedActivityIDs []uint64, limit int) ([]repository.RecommendationItem, error) {
 	s.similarCalls++
+	if s.errSimilar != nil {
+		return nil, s.errSimilar
+	}
 	if limit > len(s.similarItems) {
 		limit = len(s.similarItems)
 	}
@@ -82,16 +110,25 @@ func (s *stubRecommendationRepo) ListSimilarActivitiesBySeed(seedActivityIDs []u
 }
 
 func (s *stubRecommendationRepo) ListPublishedActivitiesForScoring() ([]domain.Activity, error) {
+	if s.errPublished != nil {
+		return nil, s.errPublished
+	}
 	return s.publishedActs, nil
 }
 
 func (s *stubRecommendationRepo) UpsertActivityScore(activityID uint64, score float64, components string, calculatedAt time.Time) error {
 	s.upsertCalls++
+	if s.errUpsert != nil {
+		return s.errUpsert
+	}
 	return nil
 }
 
 func (s *stubRecommendationRepo) UpdateScoreRanks() error {
 	s.rankCalls++
+	if s.errRank != nil {
+		return s.errRank
+	}
 	return nil
 }
 
@@ -217,4 +254,148 @@ func TestRecommendationService_RecalculateAllScores(t *testing.T) {
 	if repo.rankCalls != 1 {
 		t.Fatalf("want rank update once, got %d", repo.rankCalls)
 	}
+}
+
+func TestRecommendationService_GetRecommendations_InvalidArgs(t *testing.T) {
+	svc := NewRecommendationService(&stubRecommendationRepo{}, config.ScoringWeights{}, 5*time.Minute)
+
+	if _, err := svc.GetRecommendations(nil, 0, 0, false); !errors.Is(err, ErrInvalidRecommendationLimit) {
+		t.Fatalf("want ErrInvalidRecommendationLimit, got %v", err)
+	}
+	if _, err := svc.GetRecommendations(nil, 10, -1, false); !errors.Is(err, ErrInvalidRecommendationOffset) {
+		t.Fatalf("want ErrInvalidRecommendationOffset, got %v", err)
+	}
+}
+
+func TestRecommendationService_GetHotRecommendations_InvalidArgs(t *testing.T) {
+	svc := NewRecommendationService(&stubRecommendationRepo{}, config.ScoringWeights{}, 5*time.Minute)
+
+	if _, err := svc.GetHotRecommendations(101, 0, false); !errors.Is(err, ErrInvalidRecommendationLimit) {
+		t.Fatalf("want ErrInvalidRecommendationLimit, got %v", err)
+	}
+	if _, err := svc.GetHotRecommendations(10, -1, false); !errors.Is(err, ErrInvalidRecommendationOffset) {
+		t.Fatalf("want ErrInvalidRecommendationOffset, got %v", err)
+	}
+}
+
+func TestRecommendationService_GetHotRecommendations_NeedRefreshBypassCache(t *testing.T) {
+	repo := &stubRecommendationRepo{hotItems: []repository.RecommendationItem{{ActivityID: 1, Title: "h1"}}}
+	svc := NewRecommendationService(repo, config.ScoringWeights{}, 5*time.Minute)
+
+	if _, err := svc.GetHotRecommendations(1, 0, false); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.GetHotRecommendations(1, 0, true); err != nil {
+		t.Fatal(err)
+	}
+	if repo.hotCalls != 2 {
+		t.Fatalf("want 2 calls due to need_refresh bypass, got %d", repo.hotCalls)
+	}
+}
+
+func TestRecommendationService_GetRecommendations_NeedRefreshBypassCache(t *testing.T) {
+	repo := &stubRecommendationRepo{hotItems: []repository.RecommendationItem{{ActivityID: 1, Title: "h1"}}, freshItems: []repository.RecommendationItem{}}
+	svc := NewRecommendationService(repo, config.ScoringWeights{}, 5*time.Minute)
+
+	if _, err := svc.GetRecommendations(nil, 1, 0, false); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.GetRecommendations(nil, 1, 0, true); err != nil {
+		t.Fatal(err)
+	}
+	if repo.hotCalls != 2 {
+		t.Fatalf("want 2 hot calls due to need_refresh bypass, got %d", repo.hotCalls)
+	}
+}
+
+func TestRecommendationService_ThresholdBoundary_UsesColdFill(t *testing.T) {
+	repo := &stubRecommendationRepo{
+		behaviorCount:  20,
+		preferredCats:  []string{"CONCERT"},
+		hotItems:       []repository.RecommendationItem{{ActivityID: 1, Title: "hot"}},
+		preferredItems: []repository.RecommendationItem{{ActivityID: 2, Title: "pref"}},
+	}
+	svc := NewRecommendationService(repo, config.ScoringWeights{}, 5*time.Minute)
+	uid := uint64(11)
+
+	res, err := svc.GetRecommendations(&uid, 2, 0, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Strategy != "cold_fill" {
+		t.Fatalf("want cold_fill at threshold, got %s", res.Strategy)
+	}
+	if repo.similarCalls != 0 {
+		t.Fatalf("similar should not be called at threshold, got %d", repo.similarCalls)
+	}
+}
+
+func TestRecommendationService_LoggedInCollaborative_NoSeedFallback(t *testing.T) {
+	repo := &stubRecommendationRepo{
+		behaviorCount:  30,
+		interactedIDs:  []uint64{},
+		preferredCats:  []string{"EXPO"},
+		hotItems:       []repository.RecommendationItem{{ActivityID: 1, Title: "hot"}},
+		preferredItems: []repository.RecommendationItem{{ActivityID: 2, Title: "pref"}},
+	}
+	svc := NewRecommendationService(repo, config.ScoringWeights{}, 5*time.Minute)
+	uid := uint64(9)
+
+	res, err := svc.GetRecommendations(&uid, 2, 0, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Strategy != "cold_fill" {
+		t.Fatalf("want cold_fill fallback, got %s", res.Strategy)
+	}
+	if repo.similarCalls != 0 {
+		t.Fatalf("similar should not be called without seed, got %d", repo.similarCalls)
+	}
+}
+
+func TestRecommendationService_RecalculateAllScores_ContextCanceled(t *testing.T) {
+	repo := &stubRecommendationRepo{publishedActs: []domain.Activity{{ID: 1, MaxCapacity: 1, CreatedAt: time.Now().Add(-time.Hour)}}}
+	svc := NewRecommendationService(repo, config.ScoringWeights{}, 5*time.Minute)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err := svc.RecalculateAllScores(ctx)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("want context.Canceled, got %v", err)
+	}
+	if repo.upsertCalls != 0 {
+		t.Fatalf("upsert should not run on canceled context, got %d", repo.upsertCalls)
+	}
+}
+
+func TestRecommendationService_RecalculateAllScores_RepoErrors(t *testing.T) {
+	t.Run("published query error", func(t *testing.T) {
+		repo := &stubRecommendationRepo{errPublished: errors.New("query failed")}
+		svc := NewRecommendationService(repo, config.ScoringWeights{}, 5*time.Minute)
+		if err := svc.RecalculateAllScores(context.Background()); err == nil {
+			t.Fatal("want error")
+		}
+	})
+
+	t.Run("upsert error", func(t *testing.T) {
+		repo := &stubRecommendationRepo{
+			publishedActs: []domain.Activity{{ID: 1, MaxCapacity: 10, CreatedAt: time.Now().Add(-time.Hour)}},
+			errUpsert:     errors.New("upsert failed"),
+		}
+		svc := NewRecommendationService(repo, config.ScoringWeights{}, 5*time.Minute)
+		if err := svc.RecalculateAllScores(context.Background()); err == nil {
+			t.Fatal("want error")
+		}
+	})
+
+	t.Run("rank error", func(t *testing.T) {
+		repo := &stubRecommendationRepo{
+			publishedActs: []domain.Activity{{ID: 1, MaxCapacity: 10, CreatedAt: time.Now().Add(-time.Hour)}},
+			errRank:       errors.New("rank failed"),
+		}
+		svc := NewRecommendationService(repo, config.ScoringWeights{}, 5*time.Minute)
+		if err := svc.RecalculateAllScores(context.Background()); err == nil {
+			t.Fatal("want error")
+		}
+	})
 }

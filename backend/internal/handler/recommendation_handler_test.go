@@ -122,6 +122,24 @@ func TestRecommendationHandler_List_InvalidLimit(t *testing.T) {
 	}
 }
 
+func TestRecommendationHandler_List_InvalidOffset(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	stub := &stubRecommendationService{}
+	h := NewRecommendationHandler(stub)
+
+	r := gin.New()
+	r.GET("/api/v1/recommendations", h.List)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/recommendations?offset=bad", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", w.Code)
+	}
+}
+
 func TestRecommendationHandler_List_ServiceValidationError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -137,6 +155,45 @@ func TestRecommendationHandler_List_ServiceValidationError(t *testing.T) {
 
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("want 400, got %d", w.Code)
+	}
+}
+
+func TestRecommendationHandler_List_ServiceInternalError(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	stub := &stubRecommendationService{err: errors.New("boom")}
+	h := NewRecommendationHandler(stub)
+
+	r := gin.New()
+	r.GET("/api/v1/recommendations", h.List)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/recommendations?limit=20&offset=0", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("want 500, got %d", w.Code)
+	}
+}
+
+func TestRecommendationHandler_List_AnonymousNoUserID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	stub := &stubRecommendationService{result: service.RecommendationResult{Strategy: "hot_ranking"}}
+	h := NewRecommendationHandler(stub)
+
+	r := gin.New()
+	r.GET("/api/v1/recommendations", h.List)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/recommendations", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d", w.Code)
+	}
+	if stub.lastHasUserID {
+		t.Fatal("expected anonymous request to keep userID nil")
 	}
 }
 
@@ -164,6 +221,42 @@ func TestRecommendationHandler_Hot_OK(t *testing.T) {
 	}
 	if !stub.lastCalledHot || !stub.hotLastNeedRefresh || stub.hotLastLimit != 3 || stub.hotLastOffset != 1 {
 		t.Fatalf("hot service args mismatch: calledHot=%v needRefresh=%v limit=%d offset=%d", stub.lastCalledHot, stub.hotLastNeedRefresh, stub.hotLastLimit, stub.hotLastOffset)
+	}
+}
+
+func TestRecommendationHandler_Hot_InvalidOffset(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	stub := &stubRecommendationService{}
+	h := NewRecommendationHandler(stub)
+
+	r := gin.New()
+	r.GET("/api/v1/recommendations/hot", h.Hot)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/recommendations/hot?offset=bad", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", w.Code)
+	}
+}
+
+func TestRecommendationHandler_Hot_ServiceValidationError(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	stub := &stubRecommendationService{hotErr: service.ErrInvalidRecommendationOffset}
+	h := NewRecommendationHandler(stub)
+
+	r := gin.New()
+	r.GET("/api/v1/recommendations/hot", h.Hot)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/recommendations/hot?limit=20&offset=0", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", w.Code)
 	}
 }
 

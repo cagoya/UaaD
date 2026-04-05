@@ -232,6 +232,46 @@ go test ./... -count=1
 
 ---
 
+# 推荐模块测试增强：覆盖更多边界与错误场景
+
+**日期：** 2026-04-05  
+**范围：** 推荐服务与处理器测试扩容，覆盖缓存、阈值、回退、错误路径
+
+## 1. 文件变更清单
+
+| 操作 | 文件 | 说明 |
+|---|---|---|
+| 修改 | `internal/service/recommendation_service_test.go` | 新增参数校验、need_refresh 缓存绕过、阈值边界、CF 回退、重算错误路径测试 |
+| 修改 | `internal/handler/recommendation_handler_test.go` | 新增 offset 非法、内部错误映射、匿名路径、hot 校验错误映射测试 |
+| 修改 | `task.md` | 追加 RE-Test-Plus 阶段测试清单与验证结果 |
+
+## 2. 主要新增覆盖点
+
+- 服务层
+  - `GetRecommendations` 与 `GetHotRecommendations` 的参数边界（`limit/offset`）
+  - `need_refresh=true` 时缓存绕过行为
+  - 行为阈值边界：`behavior_count == 20` 走 `cold_fill`
+  - 协同过滤无 seed 的回退逻辑（回落到 `cold_fill`）
+  - 评分重算异常路径：数据源错误、upsert 错误、rank 更新错误、上下文取消
+
+- 处理器层
+  - `offset` 非法输入返回 400
+  - `/recommendations` 内部错误返回 500
+  - 匿名请求确保不注入用户 ID
+  - `/recommendations/hot` 的服务校验错误映射
+
+## 3. 验证命令
+
+```bash
+go test ./internal/handler/... -count=1
+go test ./internal/service/... -count=1
+go test ./... -count=1
+```
+
+三条命令均通过，推荐模块测试覆盖面较之前显著提升。
+
+---
+
 # B 组后端2：通知 + 行为埋点 + 基础设施
 
 **日期：** 2026-04-05  

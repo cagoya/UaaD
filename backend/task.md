@@ -67,3 +67,23 @@
   - [x] Run `go test ./internal/handler/... -count=1` (pass).
   - [x] Run `go test ./internal/service/... -count=1` (pass).
   - [x] Run `go test ./... -count=1` (pass).
+
+# Task: Recommendation Module Test Expansion (RE-Test-Plus)
+
+- [x] [RE-11] Service-layer scenario expansion
+  - [x] Add invalid arg tests (`limit`, `offset`) for recommendations and hot recommendations.
+  - [x] Add `need_refresh` bypass cache tests.
+  - [x] Add threshold boundary test (`behavior_count == 20` => `cold_fill`).
+  - [x] Add collaborative fallback test (no seed activities).
+  - [x] Add recalculate error-path tests (published query / upsert / rank) and canceled-context test.
+
+- [x] [RE-12] Handler-layer boundary expansion
+  - [x] Add invalid `offset` tests for both list and hot endpoints.
+  - [x] Add internal-error mapping test for `/recommendations`.
+  - [x] Add anonymous-path test to ensure nil user id behavior.
+  - [x] Add service validation error mapping test for hot endpoint.
+
+- [x] [RE-13] Verification
+  - [x] Run `go test ./internal/handler/... -count=1` (pass).
+  - [x] Run `go test ./internal/service/... -count=1` (pass).
+  - [x] Run `go test ./... -count=1` (pass).
