@@ -39,6 +39,32 @@ export interface ActivityListItem {
   artistMatches?: string[];
 }
 
+export interface ActivityDetail extends ActivityListItem {
+  latitude?: number | null;
+  longitude?: number | null;
+  organizerName?: string;
+}
+
+export interface ActivityStockSnapshot {
+  activityId: number;
+  stockRemaining: number;
+  maxCapacity: number;
+  lastUpdated?: string;
+}
+
+export interface MerchantActivityInput {
+  title: string;
+  description: string;
+  coverUrl?: string;
+  location: string;
+  category: ActivityCategory;
+  maxCapacity: number;
+  price: number;
+  enrollOpenAt: string;
+  enrollCloseAt: string;
+  activityAt: string;
+}
+
 export interface ActivitySearchParams {
   keyword: string;
   region: string;

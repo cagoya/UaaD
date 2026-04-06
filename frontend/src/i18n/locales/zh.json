@@ -68,6 +68,28 @@
     "category": "分类",
     "youMayAlsoLike": "你可能还喜欢"
   },
+  "activityDetail": {
+    "invalidId": "活动 ID 无效",
+    "loadError": "活动详情加载失败，请稍后重试。",
+    "notFound": "未找到活动详情，可能已下线或已删除。",
+    "backToList": "返回活动列表",
+    "descriptionTitle": "活动介绍",
+    "ticketPrice": "票价",
+    "stockLabel": "实时库存",
+    "capacityLabel": "总库存 {{count}}",
+    "enrollWindow": "报名时间",
+    "enrolledCount": "已有 {{count}} 人报名",
+    "countdownOpen": "距离开抢",
+    "countdownClose": "距离截止",
+    "countdownClosed": "报名状态",
+    "closed": "报名已结束",
+    "day": "天",
+    "hour": "时",
+    "minute": "分",
+    "second": "秒",
+    "enrollNow": "立即抢票",
+    "enrollUnavailable": "暂不可报名"
+  },
   "sort": {
     "relevance": "相关度排序",
     "hot": "最热门",
@@ -118,5 +140,57 @@
   },
   "settings": {
     "currentLang": "系统语言"
+  },
+  "merchant": {
+    "panel": "商家控制台",
+    "backToPublic": "返回公开站",
+    "dashboard": "商家概览",
+    "dashboardSubtitle": "查看活动数据并快速管理上架节奏。",
+    "activityList": "我的活动",
+    "listSubtitle": "管理活动信息、状态和上架操作。",
+    "createActivity": "创建活动",
+    "editActivity": "编辑活动",
+    "createSubtitle": "填写活动信息并保存草稿。",
+    "editSubtitle": "修改活动信息后保存。",
+    "createSubmit": "创建并保存草稿",
+    "editSubmit": "保存修改",
+    "createSuccess": "活动创建成功，已保存为草稿。",
+    "editSuccess": "活动更新成功。",
+    "publish": "上架",
+    "edit": "编辑",
+    "recentActivities": "最近活动",
+    "loading": "加载中...",
+    "empty": "暂无活动，请先创建一个活动。",
+    "stats": {
+      "total": "活动总数",
+      "published": "已上架",
+      "draft": "草稿/预热",
+      "enrollTotal": "累计报名"
+    },
+    "table": {
+      "activity": "活动",
+      "status": "状态",
+      "price": "票价",
+      "enroll": "报名数",
+      "actions": "操作"
+    },
+    "form": {
+      "title": "活动标题",
+      "titlePlaceholder": "请输入活动标题",
+      "description": "活动描述",
+      "descriptionPlaceholder": "请输入活动介绍",
+      "location": "活动地点",
+      "locationPlaceholder": "例如：上海梅赛德斯奔驰文化中心",
+      "category": "活动分类",
+      "capacity": "总库存",
+      "price": "票价（元）",
+      "coverUrl": "封面图 URL",
+      "enrollOpenAt": "报名开始时间",
+      "enrollCloseAt": "报名结束时间",
+      "activityAt": "活动举办时间",
+      "timeInvalid": "时间校验失败：需满足 开始 < 结束 < 举办时间。",
+      "submitFailed": "保存失败，请稍后重试。",
+      "submitting": "提交中..."
+    }
   }
 }

@@ -10,7 +10,7 @@ export function SearchResultItem({ item }: { item: ActivityListItem }) {
 
   return (
     <article className="grid gap-5 border-b border-slate-100 py-6 last:border-b-0 lg:grid-cols-[220px_minmax(0,1fr)_180px]">
-      <Link to={`/activities?keyword=${encodeURIComponent(item.title)}`} className="block overflow-hidden rounded-[24px] bg-slate-100">
+      <Link to={`/activity/${item.id}`} className="block overflow-hidden rounded-[24px] bg-slate-100">
         {item.coverUrl ? (
           <img src={item.coverUrl} alt={item.title} className="h-full w-full object-cover" />
         ) : (
@@ -25,7 +25,7 @@ export function SearchResultItem({ item }: { item: ActivityListItem }) {
             {t(`categories.${item.category}`)}
           </span>
         </div>
-        <Link to={`/activities?keyword=${encodeURIComponent(item.title)}`}>
+        <Link to={`/activity/${item.id}`}>
           <h3 className="text-2xl font-black leading-9 text-slate-900 transition hover:text-rose-600">
             {item.title}
           </h3>
@@ -68,7 +68,7 @@ export function SearchResultItem({ item }: { item: ActivityListItem }) {
         </div>
 
         <Link
-          to={`/activities?keyword=${encodeURIComponent(item.title)}`}
+          to={`/activity/${item.id}`}
           className="mt-6 inline-flex items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm transition hover:bg-rose-500 hover:text-white"
         >
           {t('public.viewDetails')}

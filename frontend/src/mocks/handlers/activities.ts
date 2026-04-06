@@ -154,7 +154,62 @@ const FIXTURE_ACTIVITIES: ActivityListItem[] = [
     viewCount: 14990,
     stockRemaining: 1440,
   },
+  {
+    id: 109,
+    title: '陈奕迅 FEAR and DREAMS 巡回演唱会 深圳站',
+    description: '超长 setlist 与沉浸式灯光编排，覆盖经典曲目与编曲重制版本。',
+    coverUrl:
+      'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80',
+    location: '深圳 大运中心体育馆',
+    category: 'CONCERT',
+    tags: ['陈奕迅', '演唱会', '粤语'],
+    maxCapacity: 30000,
+    price: 680,
+    enrollOpenAt: '2026-04-06T09:00:00Z',
+    enrollCloseAt: '2026-04-18T15:00:00Z',
+    activityAt: '2026-05-22T12:00:00Z',
+    status: 'SELLING_OUT',
+    enrollCount: 28920,
+    viewCount: 210330,
+    stockRemaining: 1080,
+  },
+  {
+    id: 110,
+    title: '周深 深空间音乐会 杭州站',
+    description: '管弦编制升级，配合全场音场重构，适合沉浸式聆听体验。',
+    coverUrl: null,
+    location: '杭州 黄龙体育中心',
+    category: 'CONCERT',
+    tags: ['周深', '音乐会', '现场'],
+    maxCapacity: 26000,
+    price: 520,
+    enrollOpenAt: '2026-04-20T10:00:00Z',
+    enrollCloseAt: '2026-04-30T10:00:00Z',
+    activityAt: '2026-06-01T11:00:00Z',
+    status: 'PREHEAT',
+    enrollCount: 0,
+    viewCount: 86220,
+    stockRemaining: 26000,
+  },
 ];
+
+const stockSnapshot = new Map<number, number>(
+  FIXTURE_ACTIVITIES.map((item) => [item.id, item.stockRemaining]),
+);
+
+const cityCoordinates: Record<string, { latitude: number; longitude: number }> = {
+  北京: { latitude: 39.9042, longitude: 116.4074 },
+  上海: { latitude: 31.2304, longitude: 121.4737 },
+  广州: { latitude: 23.1291, longitude: 113.2644 },
+  深圳: { latitude: 22.5431, longitude: 114.0579 },
+  杭州: { latitude: 30.2741, longitude: 120.1551 },
+  成都: { latitude: 30.5728, longitude: 104.0668 },
+};
+
+function resolveCoordinates(location: string) {
+  const city = Object.keys(cityCoordinates).find((key) => location.includes(key));
+  return city ? cityCoordinates[city] : { latitude: 39.9042, longitude: 116.4074 };
+}
 
 function includesMatch(source: string, query: string) {
   return source.toLowerCase().includes(query.toLowerCase());
@@ -277,6 +332,213 @@ export const activityHandlers = [
         total: ordered.length,
         page,
         page_size: pageSize,
+      },
+    });
+  }),
+  http.get('http://localhost:8080/api/v1/activities/merchant', async () => {
+    await delay(180);
+
+    return HttpResponse.json({
+      code: 0,
+      message: 'ok',
+      data: FIXTURE_ACTIVITIES.map((item) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        cover_url: item.coverUrl,
+        location: item.location,
+        category: item.category,
+        tags: item.tags,
+        max_capacity: item.maxCapacity,
+        price: item.price,
+        enroll_open_at: item.enrollOpenAt,
+        enroll_close_at: item.enrollCloseAt,
+        activity_at: item.activityAt,
+        status: item.status,
+        enroll_count: item.enrollCount,
+        view_count: item.viewCount,
+        stock_remaining: stockSnapshot.get(item.id) ?? item.stockRemaining,
+      })),
+    });
+  }),
+  http.post('http://localhost:8080/api/v1/activities', async ({ request }) => {
+    await delay(240);
+    const body = (await request.json()) as Record<string, unknown>;
+    const nextId = Math.max(...FIXTURE_ACTIVITIES.map((item) => item.id)) + 1;
+
+    const maxCapacity = Number(body.max_capacity ?? 0);
+    const newActivity: ActivityListItem = {
+      id: nextId,
+      title: String(body.title ?? ''),
+      description: String(body.description ?? ''),
+      coverUrl: body.cover_url ? String(body.cover_url) : null,
+      location: String(body.location ?? ''),
+      category: (body.category as ActivityListItem['category']) ?? 'OTHER',
+      tags: [],
+      maxCapacity,
+      price: Number(body.price ?? 0),
+      enrollOpenAt: String(body.enroll_open_at ?? new Date().toISOString()),
+      enrollCloseAt: String(body.enroll_close_at ?? new Date().toISOString()),
+      activityAt: String(body.activity_at ?? new Date().toISOString()),
+      status: 'DRAFT',
+      enrollCount: 0,
+      viewCount: 0,
+      stockRemaining: maxCapacity,
+    };
+
+    FIXTURE_ACTIVITIES.unshift(newActivity);
+    stockSnapshot.set(nextId, maxCapacity);
+
+    return HttpResponse.json(
+      {
+        code: 0,
+        message: 'ok',
+        data: {
+          activity_id: nextId,
+          status: 'DRAFT',
+        },
+      },
+      { status: 201 },
+    );
+  }),
+  http.put('http://localhost:8080/api/v1/activities/:id', async ({ params, request }) => {
+    await delay(240);
+    const id = Number(params.id);
+    const body = (await request.json()) as Record<string, unknown>;
+    const target = FIXTURE_ACTIVITIES.find((item) => item.id === id);
+    if (!target) {
+      return HttpResponse.json(
+        { code: 1004, message: 'activity not found', data: null },
+        { status: 404 },
+      );
+    }
+
+    target.title = String(body.title ?? target.title);
+    target.description = String(body.description ?? target.description);
+    target.coverUrl = body.cover_url ? String(body.cover_url) : target.coverUrl;
+    target.location = String(body.location ?? target.location);
+    target.category = (body.category as ActivityListItem['category']) ?? target.category;
+    target.maxCapacity = Number(body.max_capacity ?? target.maxCapacity);
+    target.price = Number(body.price ?? target.price);
+    target.enrollOpenAt = String(body.enroll_open_at ?? target.enrollOpenAt);
+    target.enrollCloseAt = String(body.enroll_close_at ?? target.enrollCloseAt);
+    target.activityAt = String(body.activity_at ?? target.activityAt);
+
+    if (target.status === 'DRAFT' || target.status === 'PREHEAT') {
+      stockSnapshot.set(target.id, target.maxCapacity);
+      target.stockRemaining = target.maxCapacity;
+    }
+
+    return HttpResponse.json({
+      code: 0,
+      message: 'ok',
+      data: {
+        activity_id: target.id,
+        status: target.status,
+      },
+    });
+  }),
+  http.put('http://localhost:8080/api/v1/activities/:id/publish', async ({ params }) => {
+    await delay(200);
+    const id = Number(params.id);
+    const target = FIXTURE_ACTIVITIES.find((item) => item.id === id);
+    if (!target) {
+      return HttpResponse.json(
+        { code: 1004, message: 'activity not found', data: null },
+        { status: 404 },
+      );
+    }
+
+    target.status = 'PUBLISHED';
+    stockSnapshot.set(target.id, target.maxCapacity);
+    target.stockRemaining = target.maxCapacity;
+
+    return HttpResponse.json({
+      code: 0,
+      message: 'ok',
+      data: {
+        activity_id: target.id,
+        status: target.status,
+        stock_in_cache: target.maxCapacity,
+      },
+    });
+  }),
+  http.get('http://localhost:8080/api/v1/activities/:id', async ({ params }) => {
+    await delay(220);
+
+    const id = Number(params.id);
+    const activity = FIXTURE_ACTIVITIES.find((item) => item.id === id);
+    if (!activity) {
+      return HttpResponse.json(
+        {
+          code: 1004,
+          message: 'activity not found',
+          data: null,
+        },
+        { status: 404 },
+      );
+    }
+
+    const coords = resolveCoordinates(activity.location);
+
+    return HttpResponse.json({
+      code: 0,
+      message: 'ok',
+      data: {
+        activity_id: activity.id,
+        title: activity.title,
+        description: activity.description,
+        cover_url: activity.coverUrl,
+        location: activity.location,
+        category: activity.category,
+        tags: activity.tags,
+        max_capacity: activity.maxCapacity,
+        price: activity.price,
+        enroll_open_at: activity.enrollOpenAt,
+        enroll_close_at: activity.enrollCloseAt,
+        activity_at: activity.activityAt,
+        status: activity.status,
+        enroll_count: activity.enrollCount,
+        view_count: activity.viewCount,
+        stock_remaining: activity.stockRemaining,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        created_by: {
+          user_id: 1,
+          username: 'UAAD 官方票务',
+        },
+      },
+    });
+  }),
+  http.get('http://localhost:8080/api/v1/activities/:id/stock', async ({ params }) => {
+    await delay(120);
+
+    const id = Number(params.id);
+    const activity = FIXTURE_ACTIVITIES.find((item) => item.id === id);
+    if (!activity) {
+      return HttpResponse.json(
+        {
+          code: 1004,
+          message: 'activity not found',
+          data: null,
+        },
+        { status: 404 },
+      );
+    }
+
+    const current = stockSnapshot.get(activity.id) ?? activity.stockRemaining;
+    const drift = current > 0 ? Math.floor(Math.random() * 15) : 0;
+    const stockRemaining = Math.max(0, current - drift);
+    stockSnapshot.set(activity.id, stockRemaining);
+
+    return HttpResponse.json({
+      code: 0,
+      message: 'ok',
+      data: {
+        activity_id: activity.id,
+        stock_remaining: stockRemaining,
+        max_capacity: activity.maxCapacity,
+        last_updated: new Date().toISOString(),
       },
     });
   }),

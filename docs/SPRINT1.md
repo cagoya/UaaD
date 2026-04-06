@@ -117,7 +117,7 @@
 | 我的订单 | `/orders` | C 端 |
 | 订单详情 | `/orders/:id` | C 端 |
 | 通知中心 | `/notifications` | C 端 |
-| 推荐首页 | `/app/overview` | C 端 |
+| 推荐首页（公开落地） | `/` | C 端 |
 | 个人资料 | `/profile` | C 端 |
 | 商户控制台 | `/merchant/dashboard` | B 端 |
 | 创建活动 | `/merchant/activities/new` | B 端 |
@@ -214,6 +214,98 @@ A 组 与 B 组 ──→ 业务模块互不依赖，同步推进
 
 ---
 
-## 十一、后续升级到 Redis/Kafka
+## 十一、C 组前端个人任务说明（登录 + 商家 + 活动详情）
+
+> 适用对象：当前负责 `登录页面 + 商家页面 + 演唱会具体详情页面` 的前端开发同学。
+>
+> 执行原则：先完成接口契约与类型，再做页面；提交以小步 PR 为主，避免大规模冲突。
+
+### 11.1 负责范围（文件边界）
+
+**页面：**
+- `frontend/src/pages/Login.tsx`
+- `frontend/src/pages/MerchantDashboard.tsx`
+- `frontend/src/pages/MerchantActivities.tsx`（如项目内尚未建立则新建）
+- `frontend/src/pages/MerchantActivityNew.tsx`（如项目内尚未建立则新建）
+- `frontend/src/pages/MerchantActivityEdit.tsx`（如项目内尚未建立则新建）
+- `frontend/src/pages/ActivityDetail.tsx`
+
+**组件：**
+- `frontend/src/components/MerchantForm.tsx`
+- `frontend/src/components/ActivityCountdown.tsx`
+
+**接口与类型：**
+- `frontend/src/api/endpoints/auth.ts`
+- `frontend/src/api/endpoints/activities.ts`
+- `frontend/src/types/index.ts`
+- `frontend/src/mocks/handlers.ts`
+
+### 11.2 路由与权限约定
+
+| 页面 | 路由 | 权限 |
+|---|---|---|
+| 登录页 | `/login` | 公开 |
+| 商户控制台 | `/merchant/dashboard` | `MERCHANT` |
+| 商户活动列表 | `/merchant/activities` | `MERCHANT` |
+| 新建活动 | `/merchant/activities/new` | `MERCHANT` |
+| 编辑活动 | `/merchant/activities/:id/edit` | `MERCHANT` |
+| 活动详情（演唱会详情） | `/activity/:id` | 公开 |
+
+> 说明：若前端负责人最终统一为 `/app/*` 前缀路由，以负责人在 `App.tsx` 的最终注册为准；本人只提交页面与组件实现，不直接改路由汇总文件。
+
+### 11.3 对齐的 API 契约（必须来自 SYSTEM_DESIGN.md §4）
+
+**登录页：**
+- `POST /api/v1/auth/login`
+- 成功字段：`token`、`expires_at`、`user_id`、`role`、`username`
+
+**商家页面：**
+- `GET /api/v1/activities/merchant`
+- `POST /api/v1/activities`
+- `PUT /api/v1/activities/:id`
+- `PUT /api/v1/activities/:id/publish`
+
+**活动详情页：**
+- `GET /api/v1/activities/:id`
+- `GET /api/v1/activities/:id/stock`
+
+### 11.4 开发顺序（个人执行版）
+
+1. **登录闭环先完成**
+   - 完成 `auth.ts` 类型与 API 封装；
+   - 页面提交后验证：登录成功、401 清理并跳登录、登录后回跳来源页。
+2. **商家主链路**
+   - 先做 `MerchantForm`，再做新建/编辑页；
+   - 再接入列表和发布动作（publish）。
+3. **活动详情页**
+   - 完成封面 + 关键信息 + 倒计时 + 库存进度条；
+   - 预留抢票按钮入口（报名模块未接入时提供禁用态提示）。
+
+### 11.5 每页最低验收标准（DoD）
+
+**登录页 DoD：**
+- 表单校验完整（手机号/密码必填）；
+- 登录态可持续（刷新后仍可恢复）；
+- 错误提示明确可见（密码错误、网络错误、限流）。
+
+**商家页面 DoD：**
+- 非 `MERCHANT` 角色不可访问（前端守卫 + 后端 403 处理）；
+- 创建活动时间逻辑校验：`enroll_open_at < enroll_close_at < activity_at`；
+- 发布后状态刷新正确，列表可见最新状态。
+
+**活动详情页 DoD：**
+- 具备 `Skeleton`、空态、错误态；
+- 倒计时状态正确（未开始/进行中/已结束）；
+- 库存显示与颜色态正确（充裕/紧张/售罄）。
+
+### 11.6 提交与协作要求
+
+- 不直接修改高冲突文件：`frontend/src/App.tsx`、`frontend/src/api/axios.ts`（由负责人统一维护）。
+- 每个 PR 只做一个可验证目标（例如“登录页联调”或“商家创建活动”）。
+- PR 描述必须包含：变更范围、验证截图、对应 API 契约章节。
+
+---
+
+## 十二、后续升级到 Redis/Kafka
 
 当前用 MySQL 方案，后续升级不需要重写业务逻辑，只需替换实现。建议设计时预留接口抽象（如 StockManager），开发阶段用 MySQL 实现，后续换 Redis 实现。

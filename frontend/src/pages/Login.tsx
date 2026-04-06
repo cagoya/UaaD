@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LogIn, User, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import api from '../api/axios';
+import { login as loginRequest } from '../api/endpoints';
 import LanguageToggle from '../components/LanguageToggle';
 import { useAuth } from '../context/AuthContext';
 
@@ -23,10 +23,10 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await api.post('/auth/login', { phone, password });
-      const { token } = response.data.data;
+      const authPayload = await loginRequest({ phone, password });
+      const { token } = authPayload;
       login(token);
-      const fallbackPath = '/app/overview';
+      const fallbackPath = '/';
       const from = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
       const nextPath = from?.pathname
         ? `${from.pathname}${from.search ?? ''}`
@@ -41,7 +41,9 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950 to-slate-950 relative overflow-hidden">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-4 py-10">
+      <div className="pointer-events-none absolute -left-24 -top-20 h-64 w-64 rounded-full bg-rose-200/50 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-20 h-72 w-72 rounded-full bg-pink-100 blur-3xl" />
       {/* Language Toggle in Top Right */}
       <div className="absolute top-6 right-6 z-50">
         <LanguageToggle />
@@ -51,48 +53,50 @@ const LoginPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md p-8 rounded-2xl bg-slate-900/50 border border-slate-800 backdrop-blur-xl shadow-2xl"
+        className="relative z-10 w-full max-w-md rounded-3xl border border-rose-100 bg-white/95 p-8 shadow-[0_20px_60px_-25px_rgba(225,29,72,0.35)] backdrop-blur"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="p-3 bg-blue-500/10 rounded-xl mb-4">
-            <LogIn className="w-8 h-8 text-blue-500" />
+          <div className="mb-4 rounded-2xl bg-rose-50 p-3">
+            <LogIn className="h-8 w-8 text-rose-500" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+          <h1 className="bg-gradient-to-r from-rose-600 to-pink-500 bg-clip-text text-3xl font-bold text-transparent">
             {t('auth.welcome')}
           </h1>
-          <p className="text-slate-400 mt-2">{t('auth.enterCredentials')}</p>
+          <p className="mt-2 text-slate-500">{t('auth.enterCredentials')}</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300 ml-1">{t('auth.phone')}</label>
+            <label htmlFor="phone" className="ml-1 text-sm font-medium text-slate-700">{t('auth.phone')}</label>
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500">
-                <User className="h-5 w-5 text-slate-500" />
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-rose-300 transition-colors group-focus-within:text-rose-500">
+                <User className="h-5 w-5" />
               </div>
               <input
+                id="phone"
                 type="text"
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                className="block w-full rounded-xl border border-rose-100 bg-rose-50/40 py-3 pl-10 pr-3 text-slate-800 placeholder-slate-400 transition-all focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
                 placeholder="13800000000"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300 ml-1">{t('auth.password')}</label>
+            <label htmlFor="password" className="ml-1 text-sm font-medium text-slate-700">{t('auth.password')}</label>
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500">
-                <Lock className="h-5 w-5 text-slate-500" />
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-rose-300 transition-colors group-focus-within:text-rose-500">
+                <Lock className="h-5 w-5" />
               </div>
               <input
+                id="password"
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                className="block w-full rounded-xl border border-rose-100 bg-rose-50/40 py-3 pl-10 pr-3 text-slate-800 placeholder-slate-400 transition-all focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
                 placeholder="••••••••"
               />
             </div>
@@ -102,7 +106,7 @@ const LoginPage = () => {
             <motion.div 
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+              className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-500"
             >
               {error}
             </motion.div>
@@ -111,7 +115,7 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-600/20 group"
+            className="group flex w-full items-center justify-center rounded-xl bg-rose-500 py-3 font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:bg-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -124,9 +128,9 @@ const LoginPage = () => {
           </button>
         </form>
 
-        <div className="mt-8 text-center text-slate-400">
+        <div className="mt-8 text-center text-slate-500">
           {t('auth.noAccount')}{' '}
-          <Link to="/register" className="text-blue-500 hover:text-blue-400 font-medium transition-colors">
+          <Link to="/register" className="font-medium text-rose-500 transition-colors hover:text-rose-600">
             {t('auth.register')}
           </Link>
         </div>

@@ -1,9 +1,12 @@
 import api from '../axios';
 import type {
+  ActivityDetail,
   ActivityCategory,
   ActivityListItem,
+  MerchantActivityInput,
   ActivitySearchParams,
   ActivitySearchResult,
+  ActivityStockSnapshot,
   ActivitySort,
 } from '../../types';
 
@@ -36,6 +39,24 @@ interface BackendActivity {
   enroll_count?: number;
   view_count?: number;
   stock_remaining?: number;
+  latitude?: number | null;
+  longitude?: number | null;
+  created_by?: {
+    user_id?: number;
+    username?: string;
+  };
+}
+
+interface BackendSinglePayload<T> {
+  code: number;
+  message: string;
+  data: T;
+}
+
+interface BackendMerchantMutationResult {
+  activity_id: number;
+  status: ActivityListItem['status'];
+  stock_in_cache?: number;
 }
 
 function parseTags(value: BackendActivity['tags']): string[] {
@@ -82,6 +103,32 @@ function normalizeActivity(activity: BackendActivity): ActivityListItem {
     viewCount: activity.view_count ?? 0,
     stockRemaining:
       activity.stock_remaining ?? Math.max(maxCapacity - enrollCount, 0),
+  };
+}
+
+function normalizeActivityDetail(activity: BackendActivity): ActivityDetail {
+  const base = normalizeActivity(activity);
+
+  return {
+    ...base,
+    latitude: activity.latitude ?? null,
+    longitude: activity.longitude ?? null,
+    organizerName: activity.created_by?.username,
+  };
+}
+
+function toBackendActivityInput(payload: MerchantActivityInput) {
+  return {
+    title: payload.title,
+    description: payload.description,
+    cover_url: payload.coverUrl || undefined,
+    location: payload.location,
+    category: payload.category,
+    max_capacity: payload.maxCapacity,
+    price: payload.price,
+    enroll_open_at: payload.enrollOpenAt,
+    enroll_close_at: payload.enrollCloseAt,
+    activity_at: payload.activityAt,
   };
 }
 
@@ -220,4 +267,58 @@ export async function listActivities(params: ActivitySearchParams): Promise<Acti
     page: params.page,
     pageSize: params.pageSize,
   };
+}
+
+export async function getActivityDetail(id: number): Promise<ActivityDetail> {
+  const response = await api.get<BackendSinglePayload<BackendActivity>>(`/activities/${id}`);
+  return normalizeActivityDetail(response.data.data);
+}
+
+export async function getActivityStock(id: number): Promise<ActivityStockSnapshot> {
+  const response = await api.get<
+    BackendSinglePayload<{
+      activity_id: number;
+      stock_remaining: number;
+      max_capacity: number;
+      last_updated?: string;
+    }>
+  >(`/activities/${id}/stock`);
+
+  return {
+    activityId: response.data.data.activity_id,
+    stockRemaining: response.data.data.stock_remaining,
+    maxCapacity: response.data.data.max_capacity,
+    lastUpdated: response.data.data.last_updated,
+  };
+}
+
+export async function listMerchantActivities(): Promise<ActivityListItem[]> {
+  const response = await api.get<BackendSinglePayload<BackendActivity[]>>('/activities/merchant');
+  return response.data.data.map(normalizeActivity);
+}
+
+export async function createMerchantActivity(payload: MerchantActivityInput): Promise<BackendMerchantMutationResult> {
+  const response = await api.post<BackendSinglePayload<BackendMerchantMutationResult>>(
+    '/activities',
+    toBackendActivityInput(payload),
+  );
+  return response.data.data;
+}
+
+export async function updateMerchantActivity(
+  id: number,
+  payload: MerchantActivityInput,
+): Promise<BackendMerchantMutationResult> {
+  const response = await api.put<BackendSinglePayload<BackendMerchantMutationResult>>(
+    `/activities/${id}`,
+    toBackendActivityInput(payload),
+  );
+  return response.data.data;
+}
+
+export async function publishMerchantActivity(id: number): Promise<BackendMerchantMutationResult> {
+  const response = await api.put<BackendSinglePayload<BackendMerchantMutationResult>>(
+    `/activities/${id}/publish`,
+  );
+  return response.data.data;
 }

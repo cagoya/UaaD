@@ -10,7 +10,7 @@ export function ActivityGridCard({ item }: { item: ActivityListItem }) {
 
   return (
     <article className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-      <Link to={`/activities?keyword=${encodeURIComponent(item.title)}`} className="block">
+      <Link to={`/activity/${item.id}`} className="block">
         <div className="relative aspect-[4/5] overflow-hidden bg-slate-100">
           {item.coverUrl ? (
             <img src={item.coverUrl} alt={item.title} className="h-full w-full object-cover" />

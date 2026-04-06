@@ -68,6 +68,28 @@
     "category": "Category",
     "youMayAlsoLike": "You May Also Like"
   },
+  "activityDetail": {
+    "invalidId": "Invalid activity id.",
+    "loadError": "Unable to load activity details. Please try again later.",
+    "notFound": "Activity details are not available. It may be offline or removed.",
+    "backToList": "Back to activities",
+    "descriptionTitle": "About this activity",
+    "ticketPrice": "Ticket price",
+    "stockLabel": "Live stock",
+    "capacityLabel": "Total capacity {{count}}",
+    "enrollWindow": "Registration window",
+    "enrolledCount": "{{count}} enrolled",
+    "countdownOpen": "Starts in",
+    "countdownClose": "Ends in",
+    "countdownClosed": "Registration",
+    "closed": "Registration closed",
+    "day": "D",
+    "hour": "H",
+    "minute": "M",
+    "second": "S",
+    "enrollNow": "Enroll now",
+    "enrollUnavailable": "Not available now"
+  },
   "sort": {
     "relevance": "Relevance",
     "hot": "Hottest",
@@ -118,5 +140,57 @@
   },
   "settings": {
     "currentLang": "System language"
+  },
+  "merchant": {
+    "panel": "Merchant Console",
+    "backToPublic": "Back to public site",
+    "dashboard": "Merchant Overview",
+    "dashboardSubtitle": "Track your activity metrics and publishing cadence.",
+    "activityList": "My Activities",
+    "listSubtitle": "Manage activity details, status, and publish actions.",
+    "createActivity": "Create Activity",
+    "editActivity": "Edit Activity",
+    "createSubtitle": "Fill activity details and save as draft.",
+    "editSubtitle": "Update activity details and save changes.",
+    "createSubmit": "Create draft",
+    "editSubmit": "Save changes",
+    "createSuccess": "Activity created successfully as draft.",
+    "editSuccess": "Activity updated successfully.",
+    "publish": "Publish",
+    "edit": "Edit",
+    "recentActivities": "Recent Activities",
+    "loading": "Loading...",
+    "empty": "No activities yet. Create your first one.",
+    "stats": {
+      "total": "Total activities",
+      "published": "Published",
+      "draft": "Draft/Preheat",
+      "enrollTotal": "Total enrollments"
+    },
+    "table": {
+      "activity": "Activity",
+      "status": "Status",
+      "price": "Price",
+      "enroll": "Enrollments",
+      "actions": "Actions"
+    },
+    "form": {
+      "title": "Title",
+      "titlePlaceholder": "Enter activity title",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe your activity",
+      "location": "Location",
+      "locationPlaceholder": "e.g. Mercedes-Benz Arena, Shanghai",
+      "category": "Category",
+      "capacity": "Capacity",
+      "price": "Price (CNY)",
+      "coverUrl": "Cover image URL",
+      "enrollOpenAt": "Enrollment start",
+      "enrollCloseAt": "Enrollment end",
+      "activityAt": "Activity time",
+      "timeInvalid": "Invalid timeline: start < end < activity time is required.",
+      "submitFailed": "Save failed, please try again.",
+      "submitting": "Submitting..."
+    }
   }
 }
