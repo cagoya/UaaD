@@ -61,10 +61,11 @@
   "home": {
     "recommendations": "Recommended For You",
     "sectionEyebrow": "This Week",
-    "selectedEyebrow": "Selected Activities",
-    "selectedTitle": "Reserved space for 3 featured homepage activities",
-    "selectedDescription": "These three blocks use local mock images and content first so the alternating Figma structure is fixed before real activity data is wired in.",
-    "selectedBadge": "Homepage Pick",
+    "selectedEyebrow": "Featured Picks",
+    "selectedTitle": "Recommendations first, hot ranking as fallback",
+    "selectedDescription": "The homepage spotlight prefers the recommendation API and falls back to hot activities whenever personalized data is unavailable.",
+    "selectedEmptyDescription": "Recommendations are temporarily unavailable. You can still explore the latest activities through categories and the activity plaza.",
+    "selectedBadge": "Featured Pick",
     "banners": {
       "masters": {
         "title": "Masters Collection",
@@ -97,6 +98,10 @@
     "mapTooltipCount": "Activity count: {{count}}",
     "mapTooltipTopActivity": "Top activity: {{title}}",
     "mapFallbackTopActivity": "Top activity coming soon",
+    "categoryEyebrow": "Category Overview",
+    "categoryTitle": "Whatever you need, we have it",
+    "categoryDescription": "Shows, sports, kids, exhibitions, and live music are all spread across the homepage. Hover to preview each category image, then click to open the activity plaza with that filter already applied.",
+    "categoryCardHint": "Hover to preview, click to filter instantly",
     "spotlightTagline": "Spotlight Selection",
     "spotlightLocation": "Venue",
     "spotlightOpenAt": "Enrollment Opens",
@@ -192,7 +197,38 @@
   },
   "notifications": {
     "subtitle": "Review enrollment updates, payment reminders, and activity alerts in one place.",
-    "empty": "No new notifications right now."
+    "empty": "No new notifications right now.",
+    "filters": {
+      "ALL": "All",
+      "UNREAD": "Unread",
+      "READ": "Read"
+    },
+    "pendingReadAction": "Read API pending",
+    "readOnly": "Read"
+  },
+  "profile": {
+    "subtitle": "Review your current account details and session status.",
+    "loading": "Loading profile...",
+    "loadError": "Profile data is temporarily unavailable. Please try again later.",
+    "unavailable": "Unavailable",
+    "memberSince": "Member since {{date}}",
+    "displayName": "Display name",
+    "phone": "Registered phone",
+    "email": "Email address",
+    "emailUnavailable": "The current API does not provide email information yet.",
+    "securityTitle": "Security status",
+    "securityDescription": "This page now reads live account profile data. Editing and email binding will follow when the corresponding APIs are ready.",
+    "activeSession": "Active session",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "actions": {
+      "pending": "Pending"
+    },
+    "roles": {
+      "USER": "Standard account",
+      "MERCHANT": "Merchant account",
+      "SYS_ADMIN": "System admin"
+    }
   },
   "common": {
     "previous": "Previous slide",

@@ -4,12 +4,14 @@ import { LayoutDashboard, LogOut, User, Settings, Bell, Calendar } from 'lucide-
 import { useTranslation } from 'react-i18next';
 import LanguageToggle from '../components/LanguageToggle';
 import { useAuth } from '../context/AuthContext';
+import { useNotificationCount } from '../hooks/useNotificationCount';
 
 export default function DashboardLayout() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
+  const { count } = useNotificationCount();
 
   const handleLogout = () => {
     logout();
@@ -18,7 +20,7 @@ export default function DashboardLayout() {
 
   const menuItems = [
     { icon: LayoutDashboard, label: t('dashboard.overview'), path: '/app/overview' },
-    { icon: Calendar, label: t('dashboard.activities'), path: '/app/activities' },
+    { icon: Calendar, label: t('dashboard.activities'), path: '/activities' },
     { icon: Bell, label: t('dashboard.notifications'), path: '/app/notifications' },
     { icon: User, label: t('dashboard.profile'), path: '/app/profile' },
     { icon: Settings, label: t('dashboard.settings'), path: '/app/settings' },
@@ -84,7 +86,11 @@ export default function DashboardLayout() {
               className="relative rounded-lg border border-slate-800 bg-slate-900/50 p-2 transition-colors hover:bg-slate-800"
             >
               <Bell size={20} className="text-slate-400 hover:text-white transition-colors" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-slate-950"></span>
+              {count > 0 ? (
+                <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-blue-500 px-1 text-[11px] font-bold text-white">
+                  {count > 99 ? '99+' : count}
+                </span>
+              ) : null}
             </button>
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full cursor-pointer ring-2 ring-slate-800 ring-offset-2 ring-offset-slate-950 hover:ring-blue-500/50 transition-all"></div>
           </div>

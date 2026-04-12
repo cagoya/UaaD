@@ -61,10 +61,11 @@
   "home": {
     "recommendations": "为您推荐",
     "sectionEyebrow": "本周热选",
-    "selectedEyebrow": "精选活动",
-    "selectedTitle": "预留 3 个首页精选活动展示位",
-    "selectedDescription": "这 3 个区块先用本地 mock 图片和内容固定下来，严格对齐 Figma 的交错图文结构，后续再切换到真实活动数据源。",
-    "selectedBadge": "首页精选",
+    "selectedEyebrow": "重点推荐",
+    "selectedTitle": "推荐结果优先，热门内容兜底",
+    "selectedDescription": "首页重点推荐区优先读取推荐接口；当推荐结果不可用时，自动回退到热门活动，保持主视觉内容稳定。",
+    "selectedEmptyDescription": "推荐结果暂不可用，你仍可通过分类入口和活动广场继续浏览全站内容。",
+    "selectedBadge": "重点推荐",
     "banners": {
       "masters": {
         "title": "大师典藏",
@@ -97,6 +98,10 @@
     "mapTooltipCount": "活动数量：{{count}}",
     "mapTooltipTopActivity": "热门活动：{{title}}",
     "mapFallbackTopActivity": "热门活动待更新",
+    "categoryEyebrow": "分类总览",
+    "categoryTitle": "你需要的，我们都有",
+    "categoryDescription": "演出、体育、亲子、展览和音乐现场已经为首页铺开。悬浮查看每个分类的氛围图，点击后直接带着分类条件进入活动广场。",
+    "categoryCardHint": "悬浮查看该分类主视觉，点击立即筛选",
     "spotlightTagline": "精选活动",
     "spotlightLocation": "活动地点",
     "spotlightOpenAt": "报名开启",
@@ -192,7 +197,38 @@
   },
   "notifications": {
     "subtitle": "集中查看报名提醒、支付提醒与活动动态。",
-    "empty": "暂时没有新的通知。"
+    "empty": "暂时没有新的通知。",
+    "filters": {
+      "ALL": "全部",
+      "UNREAD": "未读",
+      "READ": "已读"
+    },
+    "pendingReadAction": "已读接口待接入",
+    "readOnly": "已读"
+  },
+  "profile": {
+    "subtitle": "查看当前账户资料与基础安全状态。",
+    "loading": "正在加载资料...",
+    "loadError": "个人资料暂时加载失败，请稍后重试。",
+    "unavailable": "暂不可用",
+    "memberSince": "注册时间：{{date}}",
+    "displayName": "显示名称",
+    "phone": "注册手机号",
+    "email": "邮箱地址",
+    "emailUnavailable": "当前接口暂未提供邮箱信息",
+    "securityTitle": "安全状态",
+    "securityDescription": "当前页面已接入真实账户资料读取，资料编辑与邮箱绑定将在后续接口开放后补齐。",
+    "activeSession": "当前会话",
+    "valid": "有效",
+    "invalid": "失效",
+    "actions": {
+      "pending": "待开放"
+    },
+    "roles": {
+      "USER": "普通用户",
+      "MERCHANT": "商户账号",
+      "SYS_ADMIN": "系统管理员"
+    }
   },
   "common": {
     "previous": "上一张",
@@ -242,6 +278,18 @@
   },
   "settings": {
     "currentLang": "系统语言"
+  },
+  "footer": {
+    "brandDescription": "统一聚合演出、赛事、展览与城市活动，帮助用户更快找到下一场值得出发的现场。",
+    "linksTitle": "快速入口",
+    "serviceTitle": "服务说明",
+    "serviceCoverage": "覆盖公开活动发现、搜索、推荐与通知提醒",
+    "serviceHours": "服务时间：09:00 - 21:00",
+    "serviceMail": "服务邮箱：support@uaad.local",
+    "contactTitle": "联系我们",
+    "contactDescription": "如果你希望接入更多票务源、商户活动或协作数据，请通过以下方式联系团队。",
+    "contactMail": "商务合作：business@uaad.local",
+    "contactPhone": "服务热线：400-800-2026"
   },
   "merchant": {
     "panel": "商家控制台",
@@ -293,18 +341,6 @@
       "timeInvalid": "时间校验失败：需满足 开始 < 结束 < 举办时间。",
       "submitFailed": "保存失败，请稍后重试。",
       "submitting": "提交中..."
-    },
-  "footer": {
-    "brandDescription": "统一聚合演出、赛事、展览与城市活动，帮助用户更快找到下一场值得出发的现场。",
-    "linksTitle": "快速入口",
-    "serviceTitle": "服务说明",
-    "serviceCoverage": "覆盖公开活动发现、搜索、推荐与通知提醒",
-    "serviceHours": "服务时间：09:00 - 21:00",
-    "serviceMail": "服务邮箱：support@uaad.local",
-    "contactTitle": "联系我们",
-    "contactDescription": "如果你希望接入更多票务源、商户活动或协作数据，请通过以下方式联系团队。",
-    "contactMail": "商务合作：business@uaad.local",
-    "contactPhone": "服务热线：400-800-2026"
+    }
   }
-}
 }

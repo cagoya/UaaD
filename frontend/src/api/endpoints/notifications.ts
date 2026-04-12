@@ -19,3 +19,7 @@ export async function listNotifications() {
   const response = await api.get<ApiResponse<NotificationItem[]>>('/notifications');
   return response.data.data;
 }
+
+export async function markNotificationAsRead(id: number) {
+  await api.put(`/notifications/${id}/read`);
+}
