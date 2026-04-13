@@ -1,16 +1,21 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import type { ReactNode } from 'react';
+import { buildLoginPath } from '../utils/auth';
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
 
-  if (!isAuthenticated && !localStorage.getItem('token')) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to when they were redirected. This allows us to send them
-    // along to that page after they login, which is a nicer user experience.
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!isAuthenticated) {
+    const redirectTo = `${location.pathname}${location.search}${location.hash}`;
+    return (
+      <Navigate
+        to={buildLoginPath({ redirectTo })}
+        state={{ from: location }}
+        replace
+      />
+    );
   }
 
   return <>{children}</>;

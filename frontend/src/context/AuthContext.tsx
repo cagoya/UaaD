@@ -1,32 +1,46 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
+import type { AuthRole, AuthSession } from '../types/auth';
+import {
+  clearStoredAuthSession,
+  getStoredAuthSession,
+  setStoredAuthSession,
+} from '../utils/auth';
 
 interface AuthContextType {
   token: string | null;
+  expiresAt: string | null;
+  userId: number | null;
+  role: AuthRole | null;
+  username: string | null;
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  login: (session: AuthSession) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
+  const [session, setSession] = useState<AuthSession | null>(() => getStoredAuthSession());
 
-  const login = (newToken: string) => {
-    setToken(newToken);
-    localStorage.setItem('token', newToken);
+  const login = (newSession: AuthSession) => {
+    setSession(newSession);
+    setStoredAuthSession(newSession);
   };
 
   const logout = () => {
-    setToken(null);
-    localStorage.removeItem('token');
+    setSession(null);
+    clearStoredAuthSession();
   };
 
   const value = {
-    token,
-    isAuthenticated: !!token,
+    token: session?.token ?? null,
+    expiresAt: session?.expiresAt ?? null,
+    userId: session?.userId ?? null,
+    role: session?.role ?? null,
+    username: session?.username ?? null,
+    isAuthenticated: !!session?.token,
     login,
     logout,
   };
