@@ -1,4 +1,9 @@
 import axios from 'axios';
+import {
+  buildLoginPath,
+  clearStoredAuthSession,
+  getStoredAuthSession,
+} from '../utils/auth';
 
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
@@ -10,7 +15,7 @@ const api = axios.create({
 // Add a request interceptor to include the JWT token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getStoredAuthSession()?.token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,10 +33,12 @@ api.interceptors.response.use(
     if (error.response) {
       // Handle 401 Unauthorized
       if (error.response.status === 401) {
-        localStorage.removeItem('token');
-        // Simple client-side redirect since this runs outside context
+        clearStoredAuthSession();
         if (window.location.pathname !== '/login') {
-            window.location.href = '/login';
+          const redirectTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+          window.location.replace(
+            buildLoginPath({ redirectTo, reason: 'session_expired' })
+          );
         }
       }
       

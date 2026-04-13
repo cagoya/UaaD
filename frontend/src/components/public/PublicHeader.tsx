@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageToggle from '../LanguageToggle';
 import { useAuth } from '../../context/AuthContext';
 import { NotificationBell } from './NotificationBell';
+import { getDefaultAuthenticatedPath } from '../../utils/auth';
 
 interface PublicHeaderProps {
   initialSearchValue: string;
@@ -16,7 +17,7 @@ export function PublicHeader({
   onSearchSubmit,
 }: PublicHeaderProps) {
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, role } = useAuth();
   const [searchValue, setSearchValue] = useState(initialSearchValue);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -90,7 +91,7 @@ export function PublicHeader({
           <LanguageToggle variant="light" />
           <NotificationBell />
           <NavLink
-            to={isAuthenticated ? '/app/overview' : '/login'}
+            to={isAuthenticated ? getDefaultAuthenticatedPath(role) : '/login'}
             className="flex h-12 w-12 items-center justify-center rounded-full border border-rose-100 bg-white text-slate-700 transition hover:border-rose-200 hover:text-rose-600"
             aria-label={isAuthenticated ? t('public.myAccount') : t('auth.login')}
             title={isAuthenticated ? t('public.myAccount') : t('auth.login')}
