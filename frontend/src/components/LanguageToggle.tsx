@@ -30,20 +30,13 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({ variant = 'dark', size 
         onClick={toggleLanguage}
         aria-label={nextLanguageLabel}
         title={nextLanguageLabel}
-        className={`relative flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-full border transition-colors ${
+        className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border transition-colors ${
           isDark
             ? 'border-slate-700 bg-slate-800/50 text-slate-200 hover:border-blue-500/50'
             : 'border-rose-100 bg-white text-slate-600 shadow-sm hover:border-rose-200 hover:text-rose-600'
         }`}
       >
         <Languages size={18} className={isDark ? 'text-blue-500' : 'text-rose-500'} />
-        <span
-          className={`mt-0.5 text-[10px] font-black uppercase tracking-[0.18em] ${
-            isDark ? 'text-slate-300' : 'text-slate-500'
-          }`}
-        >
-          {currentLanguage === 'zh' ? '中' : 'EN'}
-        </span>
       </motion.button>
     );
   }

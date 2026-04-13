@@ -15,7 +15,7 @@ export default function DashboardLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/', { replace: true });
   };
 
   const menuItems = [

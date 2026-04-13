@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { BellRing, CalendarDays, Clock3, Loader2, MapPin, Ticket, Users } from 'lucide-react';
+import {
+  BellRing,
+  CalendarDays,
+  Clock3,
+  ExternalLink,
+  Loader2,
+  MapPin,
+  Ticket,
+  Users,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   createEnrollment,
@@ -41,6 +50,49 @@ function formatRemain(ms: number) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   return { days, hours, minutes, seconds };
+}
+
+function buildMapModel(activity: ActivityDetail | null) {
+  if (!activity) {
+    return {
+      hasCoordinates: false,
+      openUrl: '',
+      embedUrl: null,
+      latitudeLabel: null,
+      longitudeLabel: null,
+    };
+  }
+
+  const hasCoordinates =
+    typeof activity.latitude === 'number' && typeof activity.longitude === 'number';
+
+  if (!hasCoordinates) {
+    return {
+      hasCoordinates: false,
+      openUrl: `https://www.openstreetmap.org/search?query=${encodeURIComponent(activity.location)}`,
+      embedUrl: null,
+      latitudeLabel: null,
+      longitudeLabel: null,
+    };
+  }
+
+  const latitude = Number(activity.latitude);
+  const longitude = Number(activity.longitude);
+  const delta = 0.03;
+  const bbox = [
+    (longitude - delta).toFixed(5),
+    (latitude - delta).toFixed(5),
+    (longitude + delta).toFixed(5),
+    (latitude + delta).toFixed(5),
+  ].join('%2C');
+
+  return {
+    hasCoordinates: true,
+    openUrl: `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`,
+    embedUrl: `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latitude}%2C${longitude}`,
+    latitudeLabel: latitude.toFixed(4),
+    longitudeLabel: longitude.toFixed(4),
+  };
 }
 
 export default function ActivityDetailPage() {
@@ -108,6 +160,10 @@ export default function ActivityDetailPage() {
   }, [activityId, t]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [activityId]);
+
+  useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
@@ -149,6 +205,7 @@ export default function ActivityDetailPage() {
   }, [activity, stockRemaining]);
 
   const currentStock = Math.max(0, stockRemaining ?? activity?.stockRemaining ?? 0);
+  const mapModel = useMemo(() => buildMapModel(activity), [activity]);
 
   if (loading) {
     return (
@@ -350,10 +407,10 @@ export default function ActivityDetailPage() {
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <article className="space-y-6 rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
           <div className="grid gap-4 text-sm text-slate-600 md:grid-cols-2">
-            <p className="flex items-center gap-2">
+            <a href="#activity-location" className="flex items-center gap-2 transition hover:text-rose-600">
               <MapPin size={16} className="text-rose-500" />
               {activity.location}
-            </p>
+            </a>
             <p className="flex items-center gap-2">
               <CalendarDays size={16} className="text-rose-500" />
               {formatLongDate(activity.activityAt)}
@@ -372,6 +429,53 @@ export default function ActivityDetailPage() {
             <h2 className="text-xl font-black text-slate-900">{t('activityDetail.descriptionTitle')}</h2>
             <p className="mt-3 leading-8 text-slate-600">{activity.description}</p>
           </div>
+
+          <section id="activity-location" className="space-y-4 border-t border-slate-100 pt-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="max-w-2xl">
+                <h2 className="text-xl font-black text-slate-900">
+                  {t('activityDetail.locationTitle')}
+                </h2>
+                <p className="mt-3 leading-8 text-slate-600">{activity.location}</p>
+                <p className="mt-2 text-sm leading-7 text-slate-500">
+                  {t('activityDetail.locationDescription')}
+                </p>
+                {mapModel.hasCoordinates ? (
+                  <p className="mt-2 text-sm text-slate-400">
+                    {t('activityDetail.latitude')}: {mapModel.latitudeLabel}
+                    {' · '}
+                    {t('activityDetail.longitude')}: {mapModel.longitudeLabel}
+                  </p>
+                ) : null}
+              </div>
+
+              <a
+                href={mapModel.openUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-600"
+              >
+                {t('activityDetail.openMap')}
+                <ExternalLink size={14} />
+              </a>
+            </div>
+
+            {mapModel.embedUrl ? (
+              <div className="overflow-hidden rounded-[24px] border border-slate-200">
+                <iframe
+                  title={t('activityDetail.mapFrameTitle', { location: activity.location })}
+                  src={mapModel.embedUrl}
+                  className="h-[320px] w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            ) : (
+              <div className="rounded-[24px] border border-dashed border-slate-200 px-5 py-8 text-center text-sm leading-7 text-slate-500">
+                {t('activityDetail.mapUnavailable')}
+              </div>
+            )}
+          </section>
         </article>
 
         <aside className="space-y-5 rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
