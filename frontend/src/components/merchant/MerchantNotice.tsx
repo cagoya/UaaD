@@ -18,16 +18,16 @@ const TONE_STYLES: Record<
   }
 > = {
   success: {
-    wrapper: 'border-emerald-400/20 bg-emerald-500/10 text-emerald-100',
-    icon: 'bg-emerald-400/15 text-emerald-300',
+    wrapper: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    icon: 'bg-emerald-100 text-emerald-600',
   },
   error: {
-    wrapper: 'border-red-400/25 bg-red-500/10 text-red-100',
-    icon: 'bg-red-400/15 text-red-300',
+    wrapper: 'border-red-200 bg-red-50 text-red-700',
+    icon: 'bg-red-100 text-red-600',
   },
   info: {
-    wrapper: 'border-cyan-400/20 bg-cyan-500/10 text-cyan-100',
-    icon: 'bg-cyan-400/15 text-cyan-300',
+    wrapper: 'border-rose-200 bg-rose-50 text-rose-700',
+    icon: 'bg-rose-100 text-rose-600',
   },
 };
 
@@ -43,7 +43,7 @@ export function MerchantNotice({ tone, title, message, action }: MerchantNoticeP
 
   return (
     <div
-      className={`flex flex-col gap-4 rounded-2xl border px-4 py-4 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.8)] sm:flex-row sm:items-start sm:justify-between ${styles.wrapper}`}
+      className={`flex flex-col gap-4 rounded-2xl border px-4 py-4 shadow-sm sm:flex-row sm:items-start sm:justify-between ${styles.wrapper}`}
       role={tone === 'error' ? 'alert' : 'status'}
     >
       <div className="flex items-start gap-3">

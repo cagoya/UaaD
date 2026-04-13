@@ -57,7 +57,7 @@ export default function MerchantDashboardPage() {
         actions={
           <Link
             to="/merchant/activities/new"
-            className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-400"
+            className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600"
           >
             <PlusCircle size={16} />
             {t('merchant.createActivity')}
@@ -74,7 +74,7 @@ export default function MerchantDashboardPage() {
             <button
               type="button"
               onClick={() => void loadActivities()}
-              className="rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/12"
+              className="rounded-full border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-300 hover:text-rose-600"
             >
               {t('merchant.retry')}
             </button>
@@ -83,26 +83,26 @@ export default function MerchantDashboardPage() {
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+        <div className="rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
           <p className="text-sm text-slate-400">{t('merchant.stats.total')}</p>
-          <p className="mt-2 text-3xl font-black text-white">{loading ? '-' : stats.total}</p>
+          <p className="mt-2 text-3xl font-black text-slate-900">{loading ? '-' : stats.total}</p>
         </div>
-        <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+        <div className="rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
           <p className="text-sm text-slate-400">{t('merchant.stats.published')}</p>
-          <p className="mt-2 text-3xl font-black text-emerald-300">{loading ? '-' : stats.published}</p>
+          <p className="mt-2 text-3xl font-black text-emerald-600">{loading ? '-' : stats.published}</p>
         </div>
-        <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+        <div className="rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
           <p className="text-sm text-slate-400">{t('merchant.stats.draft')}</p>
-          <p className="mt-2 text-3xl font-black text-amber-300">{loading ? '-' : stats.draft}</p>
+          <p className="mt-2 text-3xl font-black text-amber-600">{loading ? '-' : stats.draft}</p>
         </div>
-        <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+        <div className="rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
           <p className="text-sm text-slate-400">{t('merchant.stats.enrollTotal')}</p>
-          <p className="mt-2 text-3xl font-black text-rose-200">{loading ? '-' : stats.enrollTotal.toLocaleString()}</p>
+          <p className="mt-2 text-3xl font-black text-rose-600">{loading ? '-' : stats.enrollTotal.toLocaleString()}</p>
         </div>
       </div>
 
-      <section className="rounded-3xl border border-slate-700 bg-slate-900/50 p-6">
-        <h3 className="mb-4 text-lg font-bold text-white">{t('merchant.recentActivities')}</h3>
+      <section className="rounded-3xl border border-rose-100 bg-white p-6 shadow-sm">
+        <h3 className="mb-4 text-lg font-bold text-slate-900">{t('merchant.recentActivities')}</h3>
         {loading ? (
           <MerchantStateCard
             compact
@@ -119,7 +119,7 @@ export default function MerchantDashboardPage() {
             action={
               <Link
                 to="/merchant/activities/new"
-                className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-400"
+                className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600"
               >
                 <PlusCircle size={15} />
                 {t('merchant.createActivity')}
@@ -129,13 +129,13 @@ export default function MerchantDashboardPage() {
         ) : (
           <div className="space-y-3">
             {items.slice(0, 5).map((item) => (
-              <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-700/60 bg-slate-950/40 p-4">
+              <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-[#fffaf7] p-4">
                 <div>
-                  <p className="font-semibold text-slate-100">{item.title}</p>
-                  <p className="mt-1 text-sm text-slate-400">{item.location}</p>
+                  <p className="font-semibold text-slate-900">{item.title}</p>
+                  <p className="mt-1 text-sm text-slate-500">{item.location}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
-                  <StatusChip status={item.status} theme="dark" />
+                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                  <StatusChip status={item.status} theme="soft" />
                   <span className="inline-flex items-center gap-2">
                     <BarChart3 size={14} />
                     {item.enrollCount.toLocaleString()}

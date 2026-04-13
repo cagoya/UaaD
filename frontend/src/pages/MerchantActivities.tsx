@@ -102,7 +102,7 @@ export default function MerchantActivitiesPage() {
         actions={
           <Link
             to="/merchant/activities/new"
-            className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-400"
+            className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600"
           >
             <PlusCircle size={16} />
             {t('merchant.createActivity')}
@@ -114,17 +114,17 @@ export default function MerchantActivitiesPage() {
         <MerchantNotice tone={notice.tone} title={notice.title} message={notice.message} />
       ) : null}
 
-      <section className="overflow-hidden rounded-[32px] border border-white/10 bg-slate-950/50 shadow-[0_24px_80px_-52px_rgba(15,23,42,0.95)]">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/8 px-6 py-5">
+      <section className="overflow-hidden rounded-[32px] border border-rose-100 bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-rose-100 px-6 py-5">
           <div>
-            <p className="text-sm font-semibold text-white">{t('merchant.activityList')}</p>
-            <p className="mt-1 text-sm text-slate-400">{t('merchant.listDescription')}</p>
+            <p className="text-sm font-semibold text-slate-900">{t('merchant.activityList')}</p>
+            <p className="mt-1 text-sm text-slate-500">{t('merchant.listDescription')}</p>
           </div>
           <button
             type="button"
             onClick={() => void load()}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RotateCcw size={14} />
             {t('merchant.refresh')}
@@ -151,7 +151,7 @@ export default function MerchantActivitiesPage() {
                 <button
                   type="button"
                   onClick={() => void load()}
-                  className="rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-400"
+                  className="rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600"
                 >
                   {t('merchant.retry')}
                 </button>
@@ -168,7 +168,7 @@ export default function MerchantActivitiesPage() {
               action={
                 <Link
                   to="/merchant/activities/new"
-                  className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-400"
+                  className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600"
                 >
                   <PlusCircle size={15} />
                   {t('merchant.createActivity')}
@@ -179,7 +179,7 @@ export default function MerchantActivitiesPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-950/55 text-slate-400">
+              <thead className="bg-[#fff8f3] text-slate-400">
                 <tr>
                   <th className="px-6 py-4">{t('merchant.table.activity')}</th>
                   <th className="px-6 py-4">{t('merchant.table.status')}</th>
@@ -190,13 +190,13 @@ export default function MerchantActivitiesPage() {
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item.id} className="border-t border-white/8 text-slate-200">
+                  <tr key={item.id} className="border-t border-rose-100 text-slate-600">
                     <td className="px-6 py-5 align-top">
-                      <p className="font-semibold text-white">{item.title}</p>
-                      <p className="mt-1 text-xs text-slate-400">{item.location}</p>
+                      <p className="font-semibold text-slate-900">{item.title}</p>
+                      <p className="mt-1 text-xs text-slate-500">{item.location}</p>
                     </td>
                     <td className="px-6 py-5 align-top">
-                      <StatusChip status={item.status} theme="dark" />
+                      <StatusChip status={item.status} theme="soft" />
                     </td>
                     <td className="px-6 py-5 align-top">{formatCurrency(item.price)}</td>
                     <td className="px-6 py-5 align-top">{item.enrollCount.toLocaleString()}</td>
@@ -204,7 +204,7 @@ export default function MerchantActivitiesPage() {
                       <div className="flex flex-wrap gap-2">
                         <Link
                           to={`/merchant/activities/${item.id}/edit`}
-                          className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-white/5 px-4 py-2 text-xs font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/10"
+                          className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-600"
                         >
                           <PenLine size={12} />
                           {t('merchant.edit')}
@@ -249,7 +249,7 @@ export default function MerchantActivitiesPage() {
                               setPublishingId(null);
                             }
                           }}
-                          className="inline-flex items-center gap-1 rounded-full bg-rose-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-400"
+                          className="inline-flex items-center gap-1 rounded-full bg-rose-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                         >
                           <Rocket size={12} />
                           {getPublishLabel(item)}

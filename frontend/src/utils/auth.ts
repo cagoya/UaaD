@@ -87,7 +87,7 @@ export function clearStoredAuthSession() {
 }
 
 export function getDefaultAuthenticatedPath(role?: AuthRole | null) {
-  return role === 'MERCHANT' ? '/merchant/dashboard' : '/app/overview';
+  return role === 'MERCHANT' ? '/merchant/dashboard' : '/';
 }
 
 export function normalizeRedirectPath(path?: string | null) {

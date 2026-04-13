@@ -11,7 +11,7 @@ export function NotificationBell() {
   const { count } = useNotificationCount();
 
   const handleClick = () => {
-    navigate(isAuthenticated ? '/app/notifications' : '/login');
+    navigate(isAuthenticated ? '/notifications' : '/login');
   };
 
   return (

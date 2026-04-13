@@ -14,17 +14,17 @@ export function MerchantPageHeader({
   actions,
 }: MerchantPageHeaderProps) {
   return (
-    <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(15,23,42,0.72)_55%,rgba(225,29,72,0.16))] px-6 py-6 shadow-[0_24px_80px_-48px_rgba(225,29,72,0.6)] sm:px-8 sm:py-7">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,113,133,0.22),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.14),transparent_28%)]" />
+    <section className="relative overflow-hidden rounded-[32px] border border-rose-100 bg-[linear-gradient(135deg,#fff8f3_0%,#fff1eb_58%,#ffe3d8_100%)] px-6 py-6 shadow-[0_24px_80px_-52px_rgba(244,63,94,0.24)] sm:px-8 sm:py-7">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,113,133,0.18),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.12),transparent_24%)]" />
       <div className="relative flex flex-wrap items-end justify-between gap-5">
         <div className="max-w-3xl">
-          <span className="inline-flex items-center rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300">
+          <span className="inline-flex items-center rounded-full border border-rose-200 bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-500">
             {eyebrow}
           </span>
-          <h2 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-[2rem]">
+          <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-[2rem]">
             {title}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
             {description}
           </p>
         </div>

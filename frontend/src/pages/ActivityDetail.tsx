@@ -492,7 +492,7 @@ export default function ActivityDetailPage() {
       if (result.orderNo) {
         const order = await findOrderByOrderNo(result.orderNo).catch(() => null);
         if (order) {
-          navigate(`/app/orders/${order.id}`, {
+          navigate(`/orders/${order.id}`, {
             state: { activityTitle: activity.title },
           });
           return;
@@ -500,7 +500,7 @@ export default function ActivityDetailPage() {
       }
 
       if (result.enrollmentId) {
-        navigate(`/app/enroll-status/${result.enrollmentId}`, {
+        navigate(`/enroll-status/${result.enrollmentId}`, {
           state: { activityTitle: activity.title },
         });
         return;

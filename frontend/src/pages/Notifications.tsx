@@ -94,12 +94,12 @@ export default function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 pb-12">
-      <section className="overflow-hidden rounded-[32px] border border-slate-800/80 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.2),transparent_34%),linear-gradient(160deg,rgba(15,23,42,0.96),rgba(2,6,23,0.96))] px-6 py-8 shadow-[0_28px_90px_-48px_rgba(15,23,42,0.98)] lg:px-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-300/80">UAAD</p>
-        <h2 className="mt-3 text-3xl font-black tracking-tight text-white">
+      <section className="overflow-hidden rounded-[32px] border border-rose-100 bg-[linear-gradient(135deg,#fff8f3_0%,#fff1eb_60%,#ffe3d8_100%)] px-6 py-8 shadow-[0_28px_80px_-52px_rgba(244,63,94,0.28)] lg:px-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-rose-400">UAAD</p>
+        <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-900">
           {t('public.notifications')}
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300 lg:text-base">
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500 lg:text-base">
           {t('notifications.subtitle')}
         </p>
       </section>
@@ -113,8 +113,8 @@ export default function NotificationsPage() {
               onClick={() => setFilter(value)}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 filter === value
-                  ? 'border-blue-400/30 bg-blue-500 text-white shadow-lg shadow-blue-950/40'
-                  : 'border-slate-700 bg-slate-950/60 text-slate-300 hover:border-blue-500/30 hover:text-white'
+                  ? 'border-rose-500 bg-rose-500 text-white'
+                  : 'border-rose-100 bg-white text-slate-600 hover:border-rose-200 hover:text-rose-600'
               }`}
             >
               {t(`notifications.filters.${value}`)}
@@ -126,7 +126,7 @@ export default function NotificationsPage() {
           type="button"
           onClick={() => void markItemsAsRead(items.filter((item) => !item.isRead).map((item) => item.id))}
           disabled={unreadCount === 0}
-          className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-blue-500/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <CheckCheck size={16} />
           {t('notifications.markAllRead')}
@@ -138,43 +138,43 @@ export default function NotificationsPage() {
           Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="rounded-[28px] border border-slate-800 bg-slate-900/45 p-6 shadow-2xl backdrop-blur-sm"
+              className="rounded-[28px] border border-rose-100 bg-white p-6 shadow-sm"
             >
-              <div className="h-5 w-40 animate-pulse rounded-full bg-slate-800" />
-              <div className="mt-4 h-4 w-full animate-pulse rounded-full bg-slate-800" />
-              <div className="mt-2 h-4 w-3/4 animate-pulse rounded-full bg-slate-800" />
+              <div className="h-5 w-40 animate-pulse rounded-full bg-rose-100" />
+              <div className="mt-4 h-4 w-full animate-pulse rounded-full bg-rose-100" />
+              <div className="mt-2 h-4 w-3/4 animate-pulse rounded-full bg-rose-100" />
             </div>
           ))
         ) : error ? (
-          <div className="rounded-[32px] border border-amber-500/20 bg-amber-500/10 px-6 py-5 text-sm text-amber-200 shadow-sm">
+          <div className="rounded-[32px] border border-amber-200 bg-amber-50 px-6 py-5 text-sm text-amber-700 shadow-sm">
             {error}
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="rounded-[32px] border border-dashed border-slate-700 bg-slate-900/35 px-6 py-12 text-center shadow-sm">
-            <Bell className="mx-auto text-slate-500" size={28} />
-            <p className="mt-4 text-slate-300">{t('notifications.empty')}</p>
+          <div className="rounded-[32px] border border-dashed border-rose-200 bg-white px-6 py-12 text-center shadow-sm">
+            <Bell className="mx-auto text-rose-300" size={28} />
+            <p className="mt-4 text-slate-500">{t('notifications.empty')}</p>
           </div>
         ) : (
           filteredItems.map((item) => (
             <article
               key={item.id}
-              className={`rounded-[28px] border p-6 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.95)] ${
+              className={`rounded-[28px] border p-6 shadow-sm ${
                 item.isRead
-                  ? 'border-slate-800 bg-slate-900/45'
-                  : 'border-blue-500/25 bg-blue-500/10'
+                  ? 'border-rose-100 bg-white'
+                  : 'border-rose-200 bg-rose-50/80'
               }`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3">
                     {!item.isRead ? (
-                      <span className="inline-flex h-2.5 w-2.5 rounded-full bg-blue-400" />
+                      <span className="inline-flex h-2.5 w-2.5 rounded-full bg-rose-500" />
                     ) : null}
-                    <h3 className="text-lg font-bold text-white">{item.title}</h3>
+                    <h3 className="text-lg font-bold text-slate-900">{item.title}</h3>
                   </div>
-                  <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-300">{item.content}</p>
+                  <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-600">{item.content}</p>
                 </div>
-                <span className="rounded-full border border-white/8 bg-slate-950/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <span className="rounded-full border border-slate-200 bg-[#fff8f3] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                   {new Date(item.createdAt).toLocaleDateString('zh-CN')}
                 </span>
               </div>
@@ -182,7 +182,7 @@ export default function NotificationsPage() {
                 <button
                   type="button"
                   onClick={() => void handleOpenNotification(item)}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-950/60 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:border-blue-500/35 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-600"
                 >
                   {t('notifications.viewDetails')}
                   <ChevronRight size={14} />
@@ -191,12 +191,12 @@ export default function NotificationsPage() {
                   <button
                     type="button"
                     onClick={() => void markItemsAsRead([item.id])}
-                    className="rounded-full bg-blue-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-400"
+                    className="rounded-full bg-rose-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-rose-600"
                   >
                     {t('notifications.markRead')}
                   </button>
                 ) : (
-                  <span className="rounded-full border border-slate-700 bg-slate-950/60 px-4 py-2 text-xs font-semibold text-slate-400">
+                  <span className="rounded-full border border-slate-200 bg-[#fff8f3] px-4 py-2 text-xs font-semibold text-slate-400">
                     {t('notifications.readOnly')}
                   </span>
                 )}
@@ -207,21 +207,21 @@ export default function NotificationsPage() {
       </div>
 
       {selectedNotification ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 py-8 backdrop-blur-sm">
-          <div className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-slate-800 bg-slate-950 shadow-[0_32px_90px_-36px_rgba(2,6,23,0.92)]">
-            <div className="flex items-start justify-between gap-4 border-b border-white/6 px-6 py-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 px-4 py-8 backdrop-blur-sm">
+          <div className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-rose-100 bg-white shadow-[0_32px_90px_-48px_rgba(244,63,94,0.22)]">
+            <div className="flex items-start justify-between gap-4 border-b border-rose-100 bg-[linear-gradient(180deg,#fff8f3_0%,#ffffff_100%)] px-6 py-5">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-300/80">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-rose-400">
                   UAAD
                 </p>
-                <h3 className="mt-2 text-2xl font-black tracking-tight text-white">
+                <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-900">
                   {selectedNotification.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedNotificationId(null)}
-                className="rounded-full border border-slate-700 bg-slate-900/80 p-2 text-slate-400 transition hover:border-blue-500/35 hover:text-white"
+                className="rounded-full border border-rose-100 bg-white p-2 text-slate-400 transition hover:border-rose-200 hover:text-rose-600"
                 aria-label={t('notifications.closeDetails')}
               >
                 <X size={18} />
@@ -230,23 +230,23 @@ export default function NotificationsPage() {
 
             <div className="space-y-5 px-6 py-6">
               <div className="flex flex-wrap gap-3">
-                <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-300">
+                <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-rose-600">
                   {selectedNotification.type}
                 </span>
-                <span className="rounded-full border border-white/8 bg-slate-900/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                <span className="rounded-full border border-slate-200 bg-[#fff8f3] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   {new Date(selectedNotification.createdAt).toLocaleString('zh-CN')}
                 </span>
               </div>
 
-              <p className="text-sm leading-8 text-slate-300">{selectedNotification.content}</p>
+              <p className="text-sm leading-8 text-slate-600">{selectedNotification.content}</p>
             </div>
 
-            <div className="flex flex-wrap justify-end gap-3 border-t border-white/6 px-6 py-4">
+            <div className="flex flex-wrap justify-end gap-3 border-t border-rose-100 px-6 py-4">
               {!selectedNotification.isRead ? (
                 <button
                   type="button"
                   onClick={() => void markItemsAsRead([selectedNotification.id])}
-                  className="rounded-full border border-slate-700 bg-slate-900/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-blue-500/35 hover:text-white"
+                  className="rounded-full border border-rose-100 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-600"
                 >
                   {t('notifications.markRead')}
                 </button>
@@ -254,7 +254,7 @@ export default function NotificationsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedNotificationId(null)}
-                className="rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-400"
+                className="rounded-full bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-600"
               >
                 {t('notifications.closeDetails')}
               </button>

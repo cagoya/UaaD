@@ -24,27 +24,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function shouldRestoreSession(session: AuthSession | null) {
+  return Boolean(session?.token && (!session.userId || !session.username || !session.role));
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<AuthSession | null>(() => getStoredAuthSession());
-  const [isInitializing, setIsInitializing] = useState(() => {
-    const storedSession = getStoredAuthSession();
-    return Boolean(
-      storedSession?.token &&
-        (!storedSession.userId || !storedSession.username || !storedSession.role),
-    );
-  });
+  const [isInitializing, setIsInitializing] = useState(() =>
+    shouldRestoreSession(getStoredAuthSession()),
+  );
 
   useEffect(() => {
-    if (!session?.token) {
-      setIsInitializing(false);
+    if (!shouldRestoreSession(session)) {
       return;
     }
 
-    if (session.userId && session.username && session.role) {
-      setIsInitializing(false);
+    const pendingSession = session;
+    if (!pendingSession?.token) {
       return;
     }
-
     let active = true;
 
     getProfile({ skipAuthRedirect: true })
@@ -54,8 +52,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const restoredSession: AuthSession = {
-          token: session.token,
-          expiresAt: session.expiresAt ?? null,
+          token: pendingSession.token,
+          expiresAt: pendingSession.expiresAt ?? null,
           userId: profile.userId,
           username: profile.username,
           role: profile.role,
@@ -82,11 +80,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (nextSession: AuthSession) => {
     setSession(nextSession);
+    setIsInitializing(shouldRestoreSession(nextSession));
     setStoredAuthSession(nextSession);
   };
 
   const logout = () => {
     setSession(null);
+    setIsInitializing(false);
     clearStoredAuthSession();
   };
 

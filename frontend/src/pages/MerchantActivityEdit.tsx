@@ -70,7 +70,7 @@ export default function MerchantActivityEditPage() {
         eyebrow={t('merchant.panel')}
         title={t('merchant.editActivity')}
         description={t('merchant.editSubtitle')}
-        actions={activityStatus ? <StatusChip status={activityStatus} theme="dark" /> : null}
+        actions={activityStatus ? <StatusChip status={activityStatus} theme="soft" /> : null}
       />
 
       {loading ? (
@@ -92,14 +92,14 @@ export default function MerchantActivityEditPage() {
                 <button
                   type="button"
                   onClick={() => void loadActivity()}
-                  className="rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-400"
+                  className="rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600"
                 >
                   {t('merchant.retry')}
                 </button>
               ) : null}
               <Link
                 to="/merchant/activities"
-                className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-5 py-2.5 text-sm font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-600"
               >
                 <ArrowLeft size={15} />
                 {t('merchant.backToList')}
@@ -115,7 +115,7 @@ export default function MerchantActivityEditPage() {
           action={
             <Link
               to="/merchant/activities"
-              className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-5 py-2.5 text-sm font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-600"
             >
               <ArrowLeft size={15} />
               {t('merchant.backToList')}

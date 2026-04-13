@@ -18,7 +18,7 @@ export default function MerchantActivityNewPage() {
         title={t('merchant.createActivity')}
         description={t('merchant.createSubtitle')}
         actions={
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm font-semibold text-slate-100">
+          <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600">
             <PlusCircle size={16} />
             {t('merchant.createActivity')}
           </div>

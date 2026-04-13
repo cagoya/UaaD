@@ -111,29 +111,24 @@ export function PublicHeader({
 
     return [
       {
-        icon: LayoutDashboard,
-        label: t('dashboard.overview'),
-        path: '/app/overview',
-      },
-      {
         icon: Bell,
         label: t('dashboard.notifications'),
-        path: '/app/notifications',
+        path: '/notifications',
       },
       {
         icon: Ticket,
         label: t('orders.title'),
-        path: '/app/orders',
+        path: '/orders',
       },
       {
         icon: User,
         label: t('dashboard.profile'),
-        path: '/app/profile',
+        path: '/profile',
       },
       {
         icon: Settings,
         label: t('dashboard.settings'),
-        path: '/app/settings',
+        path: '/settings',
       },
     ];
   }, [session, t]);
@@ -326,7 +321,7 @@ export function PublicHeader({
                           type="button"
                           onClick={() => {
                             setActivePanel(null);
-                            navigate('/app/notifications', {
+                            navigate('/notifications', {
                               state: { selectedNotificationId: item.id },
                             });
                           }}
@@ -368,7 +363,7 @@ export function PublicHeader({
                     type="button"
                     onClick={() => {
                       setActivePanel(null);
-                      navigate('/app/notifications');
+                      navigate('/notifications');
                     }}
                     className="w-full rounded-full bg-rose-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-rose-600"
                   >

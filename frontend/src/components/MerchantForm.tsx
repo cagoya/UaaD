@@ -104,14 +104,14 @@ export function MerchantForm({
 
   const hasFieldError = (field: keyof MerchantActivityInput) => Boolean(errors[field]);
   const renderFieldError = (field: keyof MerchantActivityInput) =>
-    errors[field] ? <p className="text-sm text-red-300">{errors[field]}</p> : null;
+    errors[field] ? <p className="text-sm text-red-600">{errors[field]}</p> : null;
 
   const getInputClass = (field: keyof MerchantActivityInput) =>
-    `w-full rounded-2xl border px-4 py-3 text-sm text-slate-50 outline-none transition ${
+    `w-full rounded-2xl border bg-white px-4 py-3 text-sm text-slate-700 outline-none transition ${
       hasFieldError(field)
-        ? 'border-red-400/60 bg-red-500/10 focus:border-red-300 focus:ring-2 focus:ring-red-400/20'
-        : 'border-white/10 bg-white/5 focus:border-rose-300/50 focus:ring-2 focus:ring-rose-300/10'
-    } disabled:cursor-not-allowed disabled:border-white/6 disabled:bg-white/3 disabled:text-slate-400`;
+        ? 'border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-100'
+        : 'border-slate-200 focus:border-rose-300 focus:ring-2 focus:ring-rose-100'
+    } disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-400`;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -207,7 +207,7 @@ export function MerchantForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 rounded-[32px] border border-white/10 bg-slate-950/55 p-6 shadow-[0_24px_80px_-52px_rgba(15,23,42,0.95)] sm:p-7"
+      className="space-y-6 rounded-[32px] border border-rose-100 bg-white p-6 shadow-sm sm:p-7"
     >
       {lockImmutableFields ? (
         <MerchantNotice
@@ -219,7 +219,7 @@ export function MerchantForm({
 
       <div className="grid gap-5 md:grid-cols-2">
         <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.title')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.title')}</span>
           <input
             required
             value={form.title}
@@ -232,7 +232,7 @@ export function MerchantForm({
         </label>
 
         <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.description')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.description')}</span>
           <textarea
             required
             rows={4}
@@ -246,7 +246,7 @@ export function MerchantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.location')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.location')}</span>
           <input
             required
             value={form.location}
@@ -259,7 +259,7 @@ export function MerchantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.category')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.category')}</span>
           <select
             disabled={loading}
             value={form.category}
@@ -275,7 +275,7 @@ export function MerchantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.capacity')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.capacity')}</span>
           <input
             required
             min={1}
@@ -292,13 +292,13 @@ export function MerchantForm({
             className={getInputClass('maxCapacity')}
           />
           {lockImmutableFields ? (
-            <p className="text-xs text-slate-500">{t('merchant.form.capacityLocked')}</p>
+            <p className="text-xs text-slate-400">{t('merchant.form.capacityLocked')}</p>
           ) : null}
           {renderFieldError('maxCapacity')}
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.price')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.price')}</span>
           <input
             min={0}
             step={0.01}
@@ -314,7 +314,7 @@ export function MerchantForm({
         </label>
 
         <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.coverUrl')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.coverUrl')}</span>
           <input
             value={form.coverUrl ?? ''}
             disabled={loading}
@@ -326,7 +326,7 @@ export function MerchantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.enrollOpenAt')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.enrollOpenAt')}</span>
           <input
             required
             type="datetime-local"
@@ -336,13 +336,13 @@ export function MerchantForm({
             className={getInputClass('enrollOpenAt')}
           />
           {lockImmutableFields ? (
-            <p className="text-xs text-slate-500">{t('merchant.form.enrollOpenAtLocked')}</p>
+            <p className="text-xs text-slate-400">{t('merchant.form.enrollOpenAtLocked')}</p>
           ) : null}
           {renderFieldError('enrollOpenAt')}
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.enrollCloseAt')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.enrollCloseAt')}</span>
           <input
             required
             type="datetime-local"
@@ -355,7 +355,7 @@ export function MerchantForm({
         </label>
 
         <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold text-slate-200">{t('merchant.form.activityAt')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('merchant.form.activityAt')}</span>
           <input
             required
             type="datetime-local"
@@ -370,12 +370,12 @@ export function MerchantForm({
 
       {formError ? <MerchantNotice tone="error" title={t('merchant.errorTitle')} message={formError} /> : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-2">
-        <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t('merchant.form.requiredHint')}</p>
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-rose-100 pt-2">
+        <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{t('merchant.form.requiredHint')}</p>
         <button
           type="submit"
           disabled={loading}
-          className="rounded-full bg-rose-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-rose-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? t('merchant.form.submitting') : submitLabel}
         </button>
