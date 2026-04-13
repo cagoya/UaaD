@@ -67,12 +67,13 @@ export async function listNotifications(
     },
   );
 
-  const block = response.data.data;
+  const block = response.data.data as Partial<PaginatedBlock<BackendNotificationRow>> | undefined;
+  const rows = Array.isArray(block?.list) ? block.list : [];
   return {
-    list: block.list.map(normalizeNotification),
-    total: block.total,
-    page: block.page,
-    pageSize: block.page_size,
+    list: rows.map(normalizeNotification),
+    total: typeof block?.total === 'number' ? block.total : rows.length,
+    page: typeof block?.page === 'number' ? block.page : page,
+    pageSize: typeof block?.page_size === 'number' ? block.page_size : pageSize,
   };
 }
 
