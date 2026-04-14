@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -86,7 +88,20 @@ func main() {
 	behaviorHandler := handler.NewBehaviorHandler(behaviorSvc, cfg)
 	recommendHandler := handler.NewRecommendationHandler(recommendSvc)
 
-	regLimit := middleware.NewIPRateLimiter(rate.Limit(5.0/60.0), 5)
+	// 注册限流：默认约 5 次/分钟、突发 5（防刷）。本地批量 gen_jmeter_data 可在 .env 临时提高，如 REG_RATE_LIMIT_PER_MIN=120
+	regPerMin := 5.0
+	if s := os.Getenv("REG_RATE_LIMIT_PER_MIN"); s != "" {
+		if v, err := strconv.ParseFloat(s, 64); err == nil && v > 0 {
+			regPerMin = v
+		}
+	}
+	regBurst := 5
+	if s := os.Getenv("REG_RATE_LIMIT_BURST"); s != "" {
+		if v, err := strconv.Atoi(s); err == nil && v > 0 {
+			regBurst = v
+		}
+	}
+	regLimit := middleware.NewIPRateLimiter(rate.Limit(regPerMin/60.0), regBurst)
 
 	// ── Router ──────────────────────────────────────────────────────
 	r := gin.Default()
