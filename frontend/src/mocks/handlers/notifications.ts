@@ -46,4 +46,20 @@ export const notificationHandlers = [
       },
     });
   }),
+  http.put('http://localhost:8080/api/v1/notifications/:id/read', async ({ params }) => {
+    await delay(120);
+
+    const targetId = Number(params.id);
+    const target = MOCK_NOTIFICATIONS.find((item) => item.id === targetId);
+
+    if (target) {
+      target.isRead = true;
+    }
+
+    return HttpResponse.json({
+      code: 0,
+      message: 'ok',
+      data: null,
+    });
+  }),
 ];

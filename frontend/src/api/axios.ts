@@ -1,5 +1,10 @@
 import axios from 'axios';
 import { AUTH_LOGOUT_EVENT } from '../constants/authEvents';
+import {
+  buildLoginPath,
+  clearStoredAuthSession,
+  getStoredAuthSession,
+} from '../utils/auth';
 
 interface BackendEnvelope {
   code?: number;
@@ -17,6 +22,8 @@ export interface ApiBusinessError extends Error {
   };
 }
 
+const AUTH_REDIRECT_BYPASS_HEADER = 'X-UAAD-Skip-Auth-Redirect';
+
 function createBusinessError(status: number, payload: BackendEnvelope): ApiBusinessError {
   const error = new Error(payload.message || '业务请求失败') as ApiBusinessError;
   error.code = payload.code || -1;
@@ -29,6 +36,26 @@ function createBusinessError(status: number, payload: BackendEnvelope): ApiBusin
   return error;
 }
 
+function shouldSkipAuthRedirect(headers?: unknown) {
+  if (!headers) {
+    return false;
+  }
+
+  if (typeof headers === 'object' && headers !== null && 'get' in headers) {
+    const headerValue = (headers as { get?: (name: string) => string | undefined }).get?.(
+      AUTH_REDIRECT_BYPASS_HEADER,
+    );
+    return headerValue === '1';
+  }
+
+  if (typeof headers === 'object' && headers !== null) {
+    const record = headers as Record<string, string | undefined>;
+    return record[AUTH_REDIRECT_BYPASS_HEADER] === '1';
+  }
+
+  return false;
+}
+
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
   headers: {
@@ -39,7 +66,7 @@ const api = axios.create({
 // Add a request interceptor to include the JWT token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getStoredAuthSession()?.token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -61,10 +88,22 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response) {
+      const skipAuthRedirect = shouldSkipAuthRedirect(error.config?.headers);
+
       // Handle 401 Unauthorized
       if (error.response.status === 401) {
+        // First dispatch logout event for in-app state sync
         localStorage.removeItem('token');
+        clearStoredAuthSession();
         window.dispatchEvent(new CustomEvent(AUTH_LOGOUT_EVENT));
+
+        // Then redirect to login page (unless bypass header is set)
+        if (!skipAuthRedirect && window.location.pathname !== '/login') {
+          const redirectTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+          window.location.replace(
+            buildLoginPath({ redirectTo, reason: 'session_expired' })
+          );
+        }
       }
       
       // Could also add more global catches for 403, 500, etc. here
@@ -78,3 +117,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+export { AUTH_REDIRECT_BYPASS_HEADER };

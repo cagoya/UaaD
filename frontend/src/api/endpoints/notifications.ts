@@ -88,3 +88,7 @@ export async function getUnreadNotificationCount(): Promise<number> {
 export async function markNotificationRead(id: number): Promise<void> {
   await api.put(`/notifications/${id}/read`);
 }
+
+export async function markNotificationAsRead(id: number) {
+  await api.put(`/notifications/${id}/read`);
+}

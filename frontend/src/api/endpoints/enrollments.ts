@@ -5,9 +5,10 @@ import type {
   EnrollmentListResult,
   EnrollmentStatus,
   EnrollmentStatusDetail,
+  EnrollmentStatusItem,
 } from '../../types';
 
-interface BackendPayload<T> {
+interface ApiResponse<T> {
   code: number;
   message: string;
   data: T;
@@ -28,17 +29,22 @@ interface BackendCreateEnrollmentData {
   status: EnrollmentStatus;
   queue_position: number;
   enrollment_id?: number;
+  activity_id?: number;
   order_no?: string;
+  estimated_wait_seconds?: number;
+  stock_remaining?: number;
 }
 
 interface BackendEnrollmentStatusData {
   enrollment_id: number;
   activity_id: number;
-  status: EnrollmentStatus;
-  submitted_at: string;
   activity_title?: string;
-  order_no?: string;
+  status: EnrollmentStatus;
+  queue_position?: number;
+  estimated_wait_seconds?: number;
+  submitted_at?: string;
   finalized_at?: string;
+  order_no?: string;
 }
 
 interface BackendEnrollmentListItem {
@@ -64,31 +70,37 @@ function normalizeEnrollmentListItem(item: BackendEnrollmentListItem): Enrollmen
 }
 
 export async function createEnrollment(activityId: number): Promise<CreateEnrollmentResult> {
-  const response = await api.post<BackendPayload<BackendCreateEnrollmentData>>('/enrollments', {
+  const response = await api.post<ApiResponse<BackendCreateEnrollmentData>>('/enrollments', {
     activity_id: activityId,
   });
 
+  const data = response.data.data;
   return {
-    status: response.data.data.status,
-    queuePosition: response.data.data.queue_position,
-    enrollmentId: response.data.data.enrollment_id,
-    orderNo: response.data.data.order_no,
+    status: data.status,
+    queuePosition: data.queue_position,
+    enrollmentId: data.enrollment_id,
+    orderNo: data.order_no,
+    estimatedWaitSeconds: data.estimated_wait_seconds,
+    stockRemaining: data.stock_remaining,
   };
 }
 
-export async function getEnrollmentStatus(enrollmentId: number): Promise<EnrollmentStatusDetail> {
-  const response = await api.get<BackendPayload<BackendEnrollmentStatusData>>(
+export async function getEnrollmentStatus(enrollmentId: number): Promise<EnrollmentStatusItem> {
+  const response = await api.get<ApiResponse<BackendEnrollmentStatusData>>(
     `/enrollments/${enrollmentId}/status`,
   );
+  const data = response.data.data;
 
   return {
-    enrollmentId: response.data.data.enrollment_id,
-    activityId: response.data.data.activity_id,
-    status: response.data.data.status,
-    submittedAt: response.data.data.submitted_at,
-    activityTitle: response.data.data.activity_title,
-    orderNo: response.data.data.order_no,
-    finalizedAt: response.data.data.finalized_at,
+    enrollmentId: data.enrollment_id,
+    activityId: data.activity_id,
+    activityTitle: data.activity_title,
+    status: data.status,
+    queuePosition: data.queue_position,
+    estimatedWaitSeconds: data.estimated_wait_seconds,
+    submittedAt: data.submitted_at,
+    finalizedAt: data.finalized_at,
+    orderNo: data.order_no,
   };
 }
 
