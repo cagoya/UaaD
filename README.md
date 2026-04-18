@@ -3,7 +3,7 @@
 > 面向新加入的开发者、AI Agent 和技术负责人。
 > 🔒 = 必读 | 📖 = 按需阅读 | 🔧 = 开发参考
 
-**最后更新：2026-04-01**
+**最后更新：2026-04-18**
 
 ---
 
@@ -65,50 +65,35 @@
 
 #### 代码目录
 
-```
+```text
 backend/
-├── cmd/server/main.go              # 入口：DI + 路由（负责人维护）
+├── cmd/server/main.go              # 入口：DI、路由装配、后台任务启动
 ├── internal/
-│   ├── config/config.go            # 配置管理（环境变量 + 默认值）
-│   ├── domain/                     # 数据模型（纯结构体）
-│   │   ├── user.go                 # 用户表
-│   │   ├── activity.go             # 活动表
-│   │   ├── enrollment.go           # 报名表
-│   │   ├── order.go                # 订单表
-│   │   ├── behavior.go             # 用户行为表
-│   │   └── notification.go         # 通知表
-│   ├── repository/                 # 数据访问层
-│   │   ├── user_repository.go
-│   │   ├── activity_repository.go
-│   │   ├── enrollment_repository.go
-│   │   ├── order_repository.go
-│   │   └── behavior_repository.go
-│   ├── service/                    # 业务逻辑层
-│   │   └── auth_service.go         # 认证服务
-│   ├── handler/                    # HTTP Handler
-│   │   └── auth_handler.go         # 注册/登录/profile
-│   └── middleware/                 # 中间件
-│       ├── rate_limit.go           # IP 限流
-│       └── auth_jwt.go             # JWT 鉴权
-├── pkg/                            # 公共工具
-│   ├── jwtutil/jwt.go              # JWT 签发/解析
-│   └── response/response.go        # 统一 API 响应
-├── migrations/                     # DB 迁移脚本 (001~007 up/down)
-├── scripts/seed/main.go            # 测试数据 Seed 脚本
-├── walkthrough_backend.md          # 后端变更履历
-├── task.md                         # 后端任务 Checklist
+│   ├── config/                     # 环境变量、连接池、推荐参数
+│   ├── domain/                     # User / Activity / Enrollment / Order / Notification / Behavior / Score
+│   ├── handler/                    # Auth / Activity / Enrollment / Order / Notification / Behavior / Recommendation
+│   ├── infra/                      # Redis / Kafka 基础设施封装
+│   ├── middleware/                 # JWT / Optional JWT / RBAC / 限流 / Metrics
+│   ├── repository/                 # 各模块数据访问层
+│   ├── service/                    # 核心业务逻辑与库存 Lua 引擎
+│   └── worker/                     # Enrollment Kafka consumer
+├── migrations/                     # 001~007 SQL 迁移脚本
+├── pkg/                            # jwtutil / response 等公共库
+├── scripts/                        # seed 与压测数据生成脚本
+├── tests/                          # 集成、契约、JMeter 压测脚本
 ├── go.mod / go.sum                 # Go 模块依赖
-└── uaad.db                         # SQLite 数据库
+├── task.md                         # 后端任务清单
+└── uaad.db                         # 本地遗留 SQLite 样例库（非当前主链路）
 ```
 
 #### 相关文档
 
 | 文件 | 说明 | 必读时机 |
 |------|------|----------|
-| `backend/walkthrough_backend.md` | 后端变更履历：DB 连接池优化、注册限流实现、验证记录 | 了解已有工作 |
-| `backend/task.md` | 后端任务清单（BE-02~BE-05 完成状态） | 跟踪进度 |
-| `docs/System_Design.md` 第 4 章 | API 契约（请求/响应/错误码） | 写接口前 |
-| `docs/System_Design.md` 第 8 章 | Go Handler 错误处理模板 + response 包规范 | 写 handler 时 |
+| `docs/walkthrough.md` | 最近一轮联调与修复记录：商户端、通知、API 客户端等变更摘要 | 了解近期进展 |
+| `backend/task.md` | 后端任务清单：基础能力、推荐模块、测试扩展完成情况 | 跟踪进度 |
+| `docs/SYSTEM_DESIGN.md` 第 4 章 | API 契约（请求/响应/错误码） | 写接口前 |
+| `docs/SYSTEM_DESIGN.md` 第 8 章 | Go Handler 错误处理模板 + response 包规范 | 写 handler 时 |
 
 ---
 
@@ -118,32 +103,27 @@ backend/
 
 #### 代码目录
 
-```
+```text
 frontend/
 ├── src/
-│   ├── api/axios.ts                # Axios 实例 + 全局拦截器 (401 redirect)
+│   ├── api/                        # axios 实例 + activities/auth/enrollments/orders/notifications/recommendations 端点封装
+│   ├── components/                 # 公共组件、商户组件、ActivityCountdown、MerchantForm、ProtectedRoute
+│   ├── constants/                  # 认证与公共常量
 │   ├── context/AuthContext.tsx     # 认证全局状态
-│   ├── components/
-│   │   ├── ProtectedRoute.tsx      # 路由守卫
-│   │   └── LanguageToggle.tsx      # 中英文切换
-│   ├── layouts/DashboardLayout.tsx # 仪表盘侧边栏布局
-│   ├── pages/
-│   │   ├── Login.tsx               # 登录页
-│   │   ├── Register.tsx            # 注册页
-│   │   ├── Dashboard.tsx           # 仪表盘首页
-│   │   ├── Activities.tsx          # 活动列表 🚧
-│   │   ├── Profile.tsx             # 个人资料 🚧
-│   │   └── Settings.tsx            # 设置 🚧
-│   ├── i18n/locales/               # 中英文字典
-│   │   ├── zh.json
-│   │   └── en.json
-│   ├── mocks/                      # MSW Mock Service Worker
-│   │   ├── handlers.ts
-│   │   └── browser.ts
-│   └── App.tsx                     # 路由入口（前端负责人维护）
+│   ├── data/                       # 首页与地理数据
+│   ├── hooks/                      # 偏好城市、通知数量、用户偏好等 hooks
+│   ├── i18n/                       # 中英文词典与配置
+│   ├── layouts/PublicLayout.tsx    # 公共站点布局
+│   ├── mocks/                      # MSW handlers
+│   ├── pages/                      # Home / PublicActivities / ActivityDetail / Orders / Notifications / Merchant* 等页面
+│   ├── types/                      # activity / auth / enrollment / notification / order / recommendation 等类型
+│   ├── utils/                      # auth / api / formatter / countdown / notification state
+│   ├── App.tsx                     # 路由入口
+│   └── main.tsx                    # 应用启动与 Mock 开关
+├── public/                         # favicon、icons、GeoJSON、MSW worker
 ├── FRONTEND_SPEC.md                # 前端开发规范
-├── task.md                         # 前端任务 Checklist
-└── README.md                       # React+Vite 脚手架说明
+├── task.md                         # 前端任务清单
+└── package.json                    # Vite/React/Tailwind 脚本与依赖
 ```
 
 #### 相关文档
@@ -151,9 +131,9 @@ frontend/
 | 文件 | 说明 | 必读时机 |
 |------|------|----------|
 | **FRONTEND_SPEC.md** | 前端规范 — 技术栈、AuthContext 数据流、Axios 拦截器、TypeScript 类型、i18n、文件命名 | 前端开发前 |
-| `frontend/task.md` | 前端任务清单（AuthContext/ProtectedRoute/拦截器已完成后端验证） | 跟踪进度 |
-| `docs/System_Design.md` 第 11 章 | 前端路由表 + 数据流总览 + 核心页面说明 | 加新页面时 |
-| `docs/System_Design.md` 第 4 章 | API 契约 | 对接后端时 |
+| `frontend/task.md` | 前端任务清单：基础认证、公开页、订单/通知/商户端当前状态 | 跟踪进度 |
+| `docs/SYSTEM_DESIGN.md` 第 11 章 | 前端路由表 + 数据流总览 + 核心页面说明 | 加新页面时 |
+| `docs/SYSTEM_DESIGN.md` 第 4 章 | API 契约 | 对接后端时 |
 
 ---
 
@@ -171,7 +151,7 @@ frontend/
 | `006_activity_scores.up.sql` / `006_activity_scores.down.sql` | 活动热度评分表 |
 | `007_notifications.up.sql` / `007_notifications.down.sql` | 通知表 |
 
-> ⚠️ 当前阶段由 GORM AutoMigrate 负责建表，SQL 文件作为文档和 MySQL 迁移参考。
+> ⚠️ 当前主开发链路使用 MySQL + GORM AutoMigrate；SQL 文件同时作为结构说明和迁移参考。
 
 ---
 
