@@ -30,7 +30,6 @@ interface SpotlightActivityProps {
 export function SpotlightActivity({ item, mirrored = false }: SpotlightActivityProps) {
   const { t } = useTranslation();
   const coverUrl = getCoverUrl(item);
-  const enrollOpenAt = getEnrollOpenAt(item);
   const description = getDescription(item);
 
   return (
@@ -80,7 +79,7 @@ export function SpotlightActivity({ item, mirrored = false }: SpotlightActivityP
               </div>
               <div className="flex items-center gap-2">
                 <CalendarRange size={14} className="shrink-0 text-rose-400" />
-                <span>{formatLongDate(item.enrollOpenAt)}</span>
+                <span>{formatLongDate(getEnrollOpenAt(item))}</span>
               </div>
             </div>
 

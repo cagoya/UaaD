@@ -4,7 +4,6 @@ import type {
   EnrollmentListItem,
   EnrollmentListResult,
   EnrollmentStatus,
-  EnrollmentStatusDetail,
   EnrollmentStatusItem,
 } from '../../types';
 

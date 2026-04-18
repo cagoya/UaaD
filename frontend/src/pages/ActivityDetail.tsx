@@ -894,4 +894,26 @@ export default function ActivityDetailPage() {
             <button
               type="button"
               onClick={() => void handlePrimaryAction()}
-              className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${actionButtonClassName
+              disabled={isSubmitting || enrollActionState === 'soldOut' || enrollActionState === 'closed' || enrollActionState === 'unavailable'}
+              className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${actionButtonClassName}`}
+            >
+              {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : null}
+              <span>{isSubmitting ? t('activityDetail.processingAction') : actionButtonLabel}</span>
+            </button>
+
+            <p className="mt-3 text-xs leading-6 text-slate-400">{pollingHint}</p>
+
+            {enrollActionState === 'upcoming' ? (
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-4 text-sm text-slate-600">
+                <div className="flex items-start gap-3">
+                  <BellRing size={16} className="mt-0.5 shrink-0 text-rose-500" />
+                  <p>{t('activityDetail.reminderPanelHint')}</p>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </aside>
+      </section>
+    </div>
+  );
+}
