@@ -4,7 +4,8 @@
 ## 1. 必读上下文 (Mandatory Readings)
 在开始任何跨文件的重构或业务逻辑开发之前，请静默读取并分析以下文件：
 - `docs/SRS.md`：获取业务上下文字段。
-- `docs/ER_Diagram.md`：获取数据库结构。
+- `docs/SYSTEM_DESIGN.md`：获取系统架构、API 契约与关键数据流。
+- `docs/DDL.md`：获取数据库结构与字段约束。
 - `.agents/workflows/sdd-standard.md`：阅读全局规范。
 在充分理解上述文档前，请勿直接开始编写 `Entity`, `Model`, 或 `Controller` 代码。
 
@@ -16,4 +17,9 @@
 - 确保测试用例能够成功运行并覆盖核心逻辑。
 
 ## 4. 履历留痕与校验 (Operation Logging and Walkthroughs)
-- 对于任何超过 50 行的显著逻辑变更，请在完成后于 `walkthrough.md` 中生成一段涵盖主要变更和 Diff 思路的简要记录。
+- 对于任何超过 50 行的显著逻辑变更，请在完成后于 `docs/walkthrough.md` 中生成一段涵盖主要变更和 Diff 思路的简要记录。
+
+## 5. Prompt 维护约定
+- 团队通用 AI 规则优先维护在 `.agents/` 下，不要把同一条规则复制到多个工具目录分别演化。
+- `.github/copilot-instructions.md` 应保持入口性质，尽量通过引用项目真理源来约束行为。
+- 仓库内文档与提示词的治理说明见 `docs/DOCS_PROMPTS_GOVERNANCE.md`。

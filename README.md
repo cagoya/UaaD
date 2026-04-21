@@ -12,8 +12,9 @@
 1. 🔒 [SRS.md](docs/SRS.md) → 了解项目是什么
 2. 🔒 [SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md) → 看懂架构和 API
 3. 🔒 [COLLABORATION.md](docs/COLLABORATION.md) → 知道怎么和人配合
-4. 🔧 [CONTRIBUTING.md](CONTRIBUTING.md) → 知道怎么提交代码
-5. 🔧 [FRONTEND_SPEC.md](frontend/FRONTEND_SPEC.md) → 前端开发规范
+4. 🔧 [DOCS_PROMPTS_GOVERNANCE.md](docs/DOCS_PROMPTS_GOVERNANCE.md) → 知道文档和提示词该改哪里
+5. 🔧 [CONTRIBUTING.md](CONTRIBUTING.md) → 知道怎么提交代码
+6. 🔧 [FRONTEND_SPEC.md](frontend/FRONTEND_SPEC.md) → 前端开发规范
 
 ---
 
@@ -43,19 +44,22 @@
 
 ---
 
-### 2. 团队协作流程 🤝
+### 2. 团队协作流程与 AI 资产 🤝
 
 > 📍 根目录 & `.github/` & `.agents/`
 
 | 文件 | 说明 | 适合谁 |
 |------|------|--------|
 | **CONTRIBUTING.md** | 贡献指南 — 分支命名、commit 格式、AI 协作原则、质量要求 | 全员 |
+| **docs/DOCS_PROMPTS_GOVERNANCE.md** | 文档与提示词治理说明 — 真理源、适配层、更新顺序、引用规范 | 全员、AI Agent |
 | **.github/PULL_REQUEST_TEMPLATE.md** | PR 模板 — 关联工单、变更描述、执行证据、自查清单 | 全员（提 PR 时必填） |
-| **.github/copilot-instructions.md** | AI Agent 全局指令 — SDD 规范驱动开发、禁止超 SRS 开发、强制 TTD | AI Agent、开发者 |
-| **.agents/workflows/sdd-standard.md** | SDD 全局规范 — 按需阅读 SRS/ER 校验、环境工具、验证要求 | AI Agent |
+| **.github/copilot-instructions.md** | GitHub Copilot 入口指令 — 指向项目真理源，避免在工具入口重复维护规则 | AI Agent、开发者 |
+| **.agents/workflows/sdd-standard.md** | SDD 全局规范真理源 — 阅读 SRS / SYSTEM_DESIGN / DDL，按证据交付 | AI Agent |
 | **.agents/workflows/skill-sdd-arch.md** | 架构工作流 — ER 图→DDL→ORM 模型转换规范 | 架构、后端 |
 | **.agents/workflows/skill-aitdd-backend.md** | 后端 TDD 工作流 — 并发测试→性能优化→自动迭代循环 | 后端、测试 |
 | **.agents/workflows/skill-prompt-frontend.md** | 前端 Prompt 工作流 — NLP→组件生成→浏览器自校验 | 前端、AI Agent |
+
+> 约定：`.agents/` 为团队自维护 AI 规范真理源；`.github/prompts/`、`.github/skills/` 及其他工具目录默认视为兼容层或分发副本，详细规则见 [DOCS_PROMPTS_GOVERNANCE.md](docs/DOCS_PROMPTS_GOVERNANCE.md)。
 
 ---
 
