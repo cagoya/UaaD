@@ -68,7 +68,63 @@
 
 ---
 
-## 3. 目录职责
+## 3. OpenSpec 使用要求
+
+OpenSpec 是本项目管理非琐碎变更的默认流程。它不替代长期文档，而是记录“变更过程中的提案、设计、任务和可验收需求”。
+
+### 3.1 必须使用 OpenSpec 的场景
+
+下面这些变更必须先进入 `openspec/changes/<change-name>/`：
+
+- 新增或改变业务能力
+- 修改 API 契约、状态机、错误码或响应结构
+- 修改数据库结构、核心数据流或跨端联调方式
+- 做跨模块重构、目录结构调整、治理规则调整
+- 修改文档体系、Prompt 体系、AI Workflow 或 OpenSpec 管理规则
+- 需要多人评审、分阶段执行、后续归档的非琐碎改动
+
+### 3.2 可以不使用 OpenSpec 的场景
+
+下面这些变更可以直接修改：
+
+- 修复错别字、格式、断链
+- 不改变行为的注释、文案、局部说明
+- 单文件、低风险、无协作影响的小修补
+
+### 3.3 标准产物
+
+一个标准 OpenSpec change 通常包含：
+
+| 文件 | 作用 |
+|---|---|
+| `proposal.md` | 说明为什么做、做什么、影响范围 |
+| `design.md` | 说明怎么做、关键决策、风险和非目标 |
+| `tasks.md` | 拆解可执行任务，使用 checkbox 跟踪进度 |
+| `specs/<capability>/spec.md` | 描述可验收需求和场景 |
+
+### 3.4 使用流程
+
+推荐流程：
+
+1. `openspec list --json` 查看当前活跃变更
+2. `openspec new change "<change-name>"` 创建新变更
+3. `openspec status --change "<change-name>" --json` 查看需要补齐的 artifact
+4. 使用 `openspec instructions <artifact> --change "<change-name>" --json` 获取编写要求
+5. 补齐 `proposal.md`、`design.md`、`specs/**/spec.md`、`tasks.md`
+6. 使用 `openspec instructions apply --change "<change-name>" --json` 进入实现阶段
+7. 每完成一项任务就更新 `tasks.md`
+8. 完成后验证、归档，并把稳定结论同步到长期文档或主 spec
+
+### 3.5 与长期文档的关系
+
+- `openspec/changes/<change>/` 记录变更过程
+- `openspec/specs/` 记录已沉淀的 capability 需求
+- `docs/` 记录长期稳定的项目事实
+- change 完成后，不能只停留在 `openspec/changes/`；稳定结论应回写到 `docs/` 或主 spec
+
+---
+
+## 4. 目录职责
 
 ### `docs/`
 
@@ -108,7 +164,7 @@
 
 ---
 
-## 4. 编写规范
+## 5. 编写规范
 
 ### 文档命名
 
@@ -130,7 +186,7 @@
 
 ---
 
-## 5. 当前仓库的执行约定
+## 6. 当前仓库的执行约定
 
 当前仓库先采用下面这套约定：
 
@@ -138,11 +194,12 @@
 - `.agents/` 是团队 AI 工作流真理源
 - `.github/copilot-instructions.md` 只保留 GitHub Copilot 的入口性约束
 - `.github/prompts/`、`.github/skills/` 与其他工具目录默认视为兼容副本
+- 非琐碎变更必须先开 OpenSpec change
 - 如需大规模清理这些兼容目录，单独开一次变更，不在日常功能开发中顺手混改
 
 ---
 
-## 6. 提交前自检
+## 7. 提交前自检
 
 提交和文档/Prompt 相关的变更前，至少检查：
 
@@ -151,10 +208,12 @@
 - 是否留下失效链接或不存在的文件名
 - README 是否仍能把新人引导到正确入口
 - AI 指令是否仍引用当前存在的文档
+- 非琐碎变更是否已有对应 OpenSpec change
+- OpenSpec `tasks.md` 是否反映当前完成状态
 
 ---
 
-## 7. 后续可继续做的整理
+## 8. 后续可继续做的整理
 
 这份治理说明先解决“继续失控”的问题。后续还可以继续推进：
 
