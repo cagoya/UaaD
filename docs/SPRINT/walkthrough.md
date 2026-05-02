@@ -156,3 +156,75 @@ docker compose up -d
 # Prometheus: http://localhost:9090
 # Dashboard 自动出现在 "UAAD / Sprint3" 文件夹
 ```
+
+## 2026-05-02 · Grafana Dashboard 优化 — 填满空面板
+
+### 变更概览
+- **`infra/grafana/provisioning/dashboards/uaad-sprint3.json`**（重写）：将原 3 行 9 面板重构为 5 行 12 面板，消除大量空面板问题：
+  - **新增 Row 0 — Overview Stats**（4 个 Stat 面板）：总请求量、5xx 错误数、平均请求延迟、Worker 处理消息数。Stat 面板在数据为 0 时显示 "0" 而非 "No data"，解决 rate() 在无流量时返回空的问题。
+  - **Row 1 — HTTP 吞吐**：原 Panel 1（全站 RPS）与 Panel 2（报名接口 RPS）合并为一个面板，同时展示全站 RPS 与按 path 分组的吞吐；状态码 Stacked 分布保留。
+  - **Row 2 — HTTP 时延**：原 Panel 5 从仅监控 `/api/v1/enrollments` 改为监控全站 P50/P95/P99；P95 by path 保留。
+  - **Row 3 — Worker & Kafka**：原 3 个 8w 面板合并为 2 个 12w 面板（Worker 吞吐 + Worker 耗时与 Kafka Lag 合并）。
+  - **新增 Row 4 — Go Runtime**（3 个面板）：Go Goroutines、进程内存（RSS + Heap）、GC Duration。这些指标由 Go Prometheus client 自动注册，从后端启动即有数据，确保 Dashboard 永远不会全部为空。
+  - 所有 rate() 查询追加 `or vector(0)` 兜底，无流量时显示 0 而非 "No data"。
+- **`backend/internal/middleware/metrics.go`**（修改）：pre-init 路径从 4 条扩展到 8 条（新增 `/api/v1/orders`、`/api/v1/recommendations`、`/api/v1/behaviors`、`/api/v1/notifications`）；状态码 pre-init 新增 `400`、`401`、`403`、`404`。
+
+### Diff 思路
+- 空面板的根本原因：(1) rate() 在无流量时返回 NaN；(2) 过于细分的 path 过滤条件在无流量时无匹配；(3) Worker 指标仅在 Kafka 消费时产生。
+- 三管齐下：Stat 面板用 `increase()` + `$__range` 显示累计值（0 也有意义）；timeseries 追加 `or vector(0)` 防空；Go Runtime 指标天然有数据填充底部行。
+- 面板合并策略：功能重叠的合并（全站 RPS + 按路径 RPS → 同一面板双查询），单一路径 P50/P95/P99 → 全站 P50/P95/P99，减少总面板数同时提高每个面板出数据的概率。
+
+### 验证方式
+- 重启 Grafana 容器：`docker compose restart grafana`，Dashboard 自动重新加载。
+- 即使后端无流量，Row 0（Stat 全部显示 0）和 Row 4（Go Runtime 有实时数据）保证不出现空面板。
+
+## 2026-05-02 · Sprint3 验收文档整理与运行链路清晰化
+
+### 变更概览
+- **`docs/STRESS_TEST/ST_BASELINE.md`**（重写）：
+  - 新增「一、能力与监控现状总览」章节，包含两张表格：§1.1 已具备的能力（17 项，覆盖核心链路、数据一致性、压测、监控、前端）和 §1.2 仍为基础版或暂未覆盖的监控（7 项，如 Kafka Lag 精度、MySQL/Redis 组件指标、Alertmanager）。
+  - 修正架构描述：MySQL 隔离级别从「可重复读（RR）」改为「READ-COMMITTED」，与 `docker-compose.yaml` 中 `--transaction-isolation=READ-COMMITTED` 一致。
+  - 补充 §4.5 5000 并发双进程完整命令、§4.6 压测后验证命令（含重复报名检查）。
+  - 新增 §5 压测结果基线摘要表与数据一致性验证总结。
+  - 新增 §6 相关文件索引（9 个关键文件）。
+- **`docs/STRESS_TEST/ST_REPORT.md`**（修改）：
+  - §6.2 结论修正：5000 并发描述从「实际到达的 4061 并发」更新为「双进程方案成功完成完整 5000 并发测试」，与报告正文数据一致。
+  - 新增 §6.3 当前监控能力边界表（7 项），明确哪些指标已就绪、哪些仍为基础版或未采集。
+- **`docs/RUN_GUIDE.md`**（重写）：
+  - 新增 §2 三种运行态详细说明（开发态 / 联调态 / 演示态），含各态的 Docker 服务组合、前后端配置要求、启动命令。
+  - 新增 §3.2 各服务详情表（镜像、容器名、端口、数据卷）、§3.3 连接参数表。
+  - 新增 §4 后端环境配置完整环境变量清单（11 个关键变量含默认值）。
+  - 新增 §4.3 Seed 数据说明（含具体账号表）。
+  - 新增 §5.3 Mock 策略对照表，明确联调/验收阶段必须关闭 Mock。
+  - 新增 §6 Prometheus / Grafana 完整说明（数据源 provisioning、Dashboard 面板布局 5 行 12 面板、指标端点验证命令）。
+  - 新增 §8 完整启动流程速查（从零拉起 + 日常开发两套 checklist）。
+  - 新增 §9 常见问题排查（10 类典型问题及解决步骤）。
+
+### Diff 思路
+- ST_BASELINE.md 从纯执行步骤文档升级为「能力现状 + 执行指南 + 结果基线」三段式，使验收评审可在一个文件内判断项目完成度。
+- RUN_GUIDE.md 对标「新同学首日可独立拉起全栈」的目标，将三态配置差异显式列出，避免因环境变量、Mock 开关等隐式差异导致联调失败。
+- ST_REPORT.md 的 4061 → 5000 修正消除了正文数据与结论文字的矛盾。
+
+### 验证结果
+- 文档交叉引用链路完整：`RUN_GUIDE.md` → `ST_BASELINE.md` → `ST_REPORT.md` → `SPRINT3_CHECKLIST.md`。
+
+---
+
+## 2026-05-02 · Docker 容器化压测 & 报告定稿
+
+### 背景
+macOS `kern.num_taskthreads=4096` 为只读硬限制，宿主机 JMeter 单进程无法创建 5000 线程。
+
+### 主要变更
+- 构建 ARM64 原生 JMeter Docker 镜像（`jmeter-arm64:5.6.3`，基于 `eclipse-temurin:21-jre-alpine`），绕过 macOS 线程限制。
+- 三轮测试（1000/3000/5000）全部在 Docker 容器中执行，单进程一次性完成 5000 线程。
+- **`docs/STRESS_TEST/ST_REPORT.md`**（重写）：
+  - 数据全部替换为 Docker 容器执行结果（活动 45/46/47）。
+  - 5000 并发 P95 = 2ms，P99 = 4ms，与 1000/3000 表现一致，证明服务端无瓶颈。
+  - 新增 §四 Docker 容器方案说明（macOS 线程限制表、达成方式、JVM 配置）。
+  - 新增 §5.2 Grafana 监控截图。
+- HTML 报告归档至 `docs/STRESS_TEST/{1000,3000,5000}t_st/`。
+
+### Diff 思路
+- 将 JMeter 执行层从 macOS 宿主机迁移到 Docker Linux 容器，从根本上消除客户端线程瓶颈。
+- 5000 并发从「双进程拆分 + 高尾部延迟」升级为「单进程 + 毫秒级延迟」，报告数据更准确反映服务端真实性能。

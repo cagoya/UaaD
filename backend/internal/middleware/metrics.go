@@ -61,6 +61,33 @@ func init() {
 		workerMessageProcessingDurationSeconds,
 		workerKafkaLagApprox,
 	)
+
+	// Pre-initialize key label combinations so Prometheus exposes zero-valued
+	// series from startup. Without this, Grafana shows N/A until the first
+	// real request hits each path (Go prometheus client is lazy).
+	for _, path := range []string{
+		"/api/v1/enrollments",
+		"/api/v1/activities",
+		"/api/v1/orders",
+		"/api/v1/recommendations",
+		"/api/v1/behaviors",
+		"/api/v1/notifications",
+		"/api/v1/auth/login",
+		"/health",
+	} {
+		httpRequestsTotal.WithLabelValues("GET", path, "200")
+		httpRequestsTotal.WithLabelValues("POST", path, "200")
+		httpRequestDuration.WithLabelValues("GET", path)
+		httpRequestDuration.WithLabelValues("POST", path)
+	}
+	for _, status := range []string{"200", "202", "400", "401", "403", "404", "409", "410", "500"} {
+		httpRequestsTotal.WithLabelValues("POST", "/api/v1/enrollments", status)
+	}
+	workerMessagesProcessedTotal.WithLabelValues("success")
+	workerMessagesProcessedTotal.WithLabelValues("failure")
+	workerMessageProcessingDurationSeconds.WithLabelValues("success")
+	workerMessageProcessingDurationSeconds.WithLabelValues("failure")
+	workerKafkaLagApprox.WithLabelValues("enrollment")
 }
 
 // PrometheusMiddleware returns a Gin middleware that records request count

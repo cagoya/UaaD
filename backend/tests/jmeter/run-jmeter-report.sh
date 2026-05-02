@@ -5,15 +5,30 @@
 # 压测前自动：
 #   1. 用 MERCHANT 账号创建并发布新活动（触发 Redis 库存初始化）
 #   2. 调用 gen_jmeter_data 生成对应的 jmeter_users.csv
-# 因此只需要一条命令即可完成全部流程：
-#   bash run-jmeter-report.sh
-#   bash run-jmeter-report.sh enrollment-load.jmx
+# 用法：
+#   bash run-jmeter-report.sh              # 默认 1000 线程
+#   bash run-jmeter-report.sh 1000
+#   bash run-jmeter-report.sh 3000
+#   bash run-jmeter-report.sh 5000
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$here"
 
-jmx="${1:-enrollment-load.jmx}"
+# ── thread count ──────────────────────────────────────────────────────────
+thread_count="${1:-1000}"
+case "$thread_count" in
+  1000) rampup=30 ;;
+  3000) rampup=60 ;;
+  5000) rampup=90 ;;
+  *)
+    echo "Usage: $0 [1000|3000|5000]"
+    echo "  Invalid thread count: ${thread_count}"
+    exit 1
+    ;;
+esac
+
+jmx="enrollment-load.jmx"
 out_root="$here/out"
 mkdir -p "$out_root"
 
@@ -33,20 +48,8 @@ json_val() {
   python3 -c "import json,sys; d=json.loads(sys.argv[1]); print($2)" "$1" 2>/dev/null
 }
 
-# ── thread count from JMX ─────────────────────────────────────────────────
-thread_count=$(python3 << 'PYEOF'
-import xml.etree.ElementTree as ET
-tree = ET.parse("enrollment-load.jmx")
-for tg in tree.iter("ThreadGroup"):
-    if tg.get("enabled", "true").lower() == "true":
-        n = tg.find(".//intProp[@name='ThreadGroup.num_threads']")
-        if n is not None:
-            print(n.text); exit(0)
-print(1000)
-PYEOF
-)
-
 echo "=== Pre-flight: create & publish a fresh activity ==="
+echo "    threads=${thread_count}  ramp-up=${rampup}s"
 
 # ── 1. login MERCHANT ─────────────────────────────────────────────────────
 login_resp=$(curl -s -X POST "${BASE_URL}/api/v1/auth/login" \
@@ -116,11 +119,11 @@ echo "[OK] CSV generated"
 
 # ── run JMeter ─────────────────────────────────────────────────────────────
 echo ""
-echo "=== JMeter load test (threads=${thread_count}, ramp-up=30s) ==="
+echo "=== JMeter load test (threads=${thread_count}, ramp-up=${rampup}s) ==="
 ts="$(date +%Y%m%d-%H%M%S)"
-report_dir="${out_root}/report-${ts}"
-jtl="${out_root}/results-${ts}.jtl"
-jm_log="${out_root}/jmeter-${ts}.log"
+report_dir="${out_root}/report-${thread_count}t-${ts}"
+jtl="${out_root}/results-${thread_count}t-${ts}.jtl"
+jm_log="${out_root}/jmeter-${thread_count}t-${ts}.log"
 
 [[ -e "$report_dir" ]] && rm -rf "$report_dir"
 
@@ -128,5 +131,8 @@ echo "JTL:    ${jtl}"
 echo "Log:    ${jm_log}"
 echo "Report: ${report_dir}"
 
-jmeter -n -t "$jmx" -l "$jtl" -j "$jm_log" -e -o "$report_dir"
+jmeter -n -t "$jmx" \
+  -Jthreads="${thread_count}" \
+  -Jrampup="${rampup}" \
+  -l "$jtl" -j "$jm_log" -e -o "$report_dir"
 echo "Done. Open ${report_dir}/index.html"
