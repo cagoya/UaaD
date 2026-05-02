@@ -33,9 +33,11 @@ node_modules/
 
 codexDoc
 
-# JMeter 本地生成物（CSV / JTL / HTML 报告 / 日志等，统一放此目录，勿提交）
+# JMeter 本地生成物（CSV / JTL / HTML 报告 / 日志等，勿提交）
 backend/tests/jmeter/out/
 backend/tests/jmeter/jmeter.log
+backend/jmeter.log
+backend/gen_jmeter_data
 
 homework/
 

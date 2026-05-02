@@ -8,6 +8,7 @@ import (
 
 	"github.com/segmentio/kafka-go"
 	"github.com/uaad/backend/internal/domain"
+	"github.com/uaad/backend/internal/middleware"
 	"github.com/uaad/backend/internal/service"
 	"gorm.io/gorm"
 )
@@ -55,6 +56,8 @@ func (w *EnrollmentWorker) Run(ctx context.Context) {
 			time.Sleep(time.Second)
 			continue
 		}
+		stats := w.reader.Stats()
+		middleware.SetWorkerKafkaLag(stats.Topic, stats.Lag)
 		w.handleMessage(ctx, msg)
 	}
 }
@@ -113,8 +116,10 @@ func (w *EnrollmentWorker) handleMessage(ctx context.Context, msg kafka.Message)
 			log.Printf("[EnrollWorker] CRITICAL: Redis rollback also failed: %v", rbErr)
 		}
 		w.notifSvc.NotifyEnrollFail(em.UserID, 0, activityTitle)
+		middleware.RecordWorkerMessage("failure", time.Since(now).Seconds())
 		return
 	}
 
 	w.notifSvc.NotifyEnrollSuccess(em.UserID, enrollment.ID, activityTitle)
+	middleware.RecordWorkerMessage("success", time.Since(now).Seconds())
 }

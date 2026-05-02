@@ -25,10 +25,42 @@ var (
 		},
 		[]string{"method", "path"},
 	)
+
+	// Kafka enrollment worker async chain (SPRINT3 observability).
+	workerMessagesProcessedTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "worker_messages_processed_total",
+			Help: "Enrollment Kafka worker messages processed (success or failure).",
+		},
+		[]string{"status"},
+	)
+
+	workerMessageProcessingDurationSeconds = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "worker_message_processing_duration_seconds",
+			Help:    "Time spent processing one enrollment message (seconds).",
+			Buckets: prometheus.DefBuckets,
+		},
+		[]string{"status"},
+	)
+
+	workerKafkaLagApprox = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "worker_kafka_lag_approx",
+			Help: "Approximate consumer lag from kafka-go Reader stats (per topic).",
+		},
+		[]string{"topic"},
+	)
 )
 
 func init() {
-	prometheus.MustRegister(httpRequestsTotal, httpRequestDuration)
+	prometheus.MustRegister(
+		httpRequestsTotal,
+		httpRequestDuration,
+		workerMessagesProcessedTotal,
+		workerMessageProcessingDurationSeconds,
+		workerKafkaLagApprox,
+	)
 }
 
 // PrometheusMiddleware returns a Gin middleware that records request count
@@ -50,4 +82,19 @@ func PrometheusMiddleware() gin.HandlerFunc {
 		httpRequestsTotal.WithLabelValues(method, path, status).Inc()
 		httpRequestDuration.WithLabelValues(method, path).Observe(elapsed)
 	}
+}
+
+// RecordWorkerMessage records enrollment worker throughput and per-message
+// processing duration. status should be "success" or "failure".
+func RecordWorkerMessage(status string, durationSec float64) {
+	workerMessagesProcessedTotal.WithLabelValues(status).Inc()
+	workerMessageProcessingDurationSeconds.WithLabelValues(status).Observe(durationSec)
+}
+
+// SetWorkerKafkaLag exports kafka-go reader lag as a gauge (optional backlog signal).
+func SetWorkerKafkaLag(topic string, lag int64) {
+	if topic == "" {
+		topic = "unknown"
+	}
+	workerKafkaLagApprox.WithLabelValues(topic).Set(float64(lag))
 }

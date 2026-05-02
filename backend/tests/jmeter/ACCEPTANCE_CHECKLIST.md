@@ -105,10 +105,10 @@
   - 仅用已有账号：`-phones "13800000001,..."`（勿与 `-count` 同用）
   - 勿提交 CSV；`**backend/tests/jmeter/out/`** 已在 `.gitignore`
 - ✅ **核对活动 ID**：一般不改 `.jmx`；可改 `**out/jmeter_users.csv`** 第二列或 `gen_jmeter_data` 筛选
-- ✅ **执行压测（`.jmx` 约 1000 线程 / Ramp 30s）**
-  - 在 `backend/tests/jmeter` 执行 `**.\run-jmeter-report.ps1`**（产出在 `**out/`**）
-  - 自跑 `jmeter -n` 时加 `**-j out/xxx.log**`
-  - 打开 `index.html` 看成功率、P95、5xx
+- ✅ **执行压测（`.jmx` 约 1000 线程 / Ramp 30s；Sprint3 大规模见 `docs/STRESS_TEST.md`）**
+  - 在 `backend/tests/jmeter` 执行 **`.\run-jmeter-report.ps1`**（Windows）或 **`bash run-jmeter-report.sh`**（macOS/Linux），产出在 **`out/`**
+  - 自跑 `jmeter -n` 时加 **`-j out/xxx.log`**
+  - 打开 `out/report-*/index.html` 看成功率、P95/P99、5xx；对照 JMeter **`outcome`**（`QUEUED` / `SOLD_OUT` / `CONFLICT` / `FAILURE`）
 
 ### 5.2 后端库存一致性检查
 
@@ -143,4 +143,41 @@
 - ✅ **Int64 精度**：JSON 数字 id 超 `2^53-1` 有 JS 风险；当前 seed 量级安全；超大 id 需契约改为字符串等
 - ✅ **时间**：后端多为 **RFC3339**；前端 `formatLongDate` / `new Date`
 - ✅ **枚举**：`status`、`category`、`role` 等与 `types`、`SYSTEM_DESIGN.md` 一致（随契约迭代）
+
+---
+
+## 七、Sprint 3 压测基线验收（`docs/SPRINT3.md` 第二组 Task 3）
+
+**目标：** 与 `docs/STRESS_TEST.md` 统一口径，可复现地固化一轮报名压测基线证据。
+
+### 7.1 跑前检查
+
+- [ ] **依赖全起**：`docker-compose`（MySQL / Redis / Kafka；可选 Prometheus / Grafana）**healthy**。
+- [ ] **后端**：`go run ./cmd/server`，默认 `:8080`。
+- [ ] **Seed**：`go run ./scripts/seed`。
+- [ ] **压测活动**：单个 **`PUBLISHED`** 活动；Redis **`activity:<id>:stock`** 已预热（发布路径 `WarmUp`；若 Redis 被清空需重新 publish 或对齐库存）。
+- [ ] **CSV 行数 = 线程数**：`go run ./scripts/gen_jmeter_data -count <N>`；`out/jmeter_users.csv` 勿提交。
+- [ ] **大规模**：跑 3000 线程组时，在 `.jmx` 中 **禁用** 1000 线程组、**启用**「Sprint3 大规模压测 3000 并发」；`-count 3000`。冲刺 5000 时同步改线程数与 `-count 5000`。
+
+### 7.2 业务判定（与 JMeter 一致）
+
+| 类型 | 条件 |
+|------|------|
+| 成功排队 | **HTTP 202** + **`code=1201`** |
+| 业务售罄（非失败） | **HTTP 200 或 410** + **`code=1101`** |
+| 失败 | **5xx**、超时、非预期状态/业务码；JMeter 样本失败 |
+
+脚本内 **`outcome`**：`QUEUED` / `SOLD_OUT` / `CONFLICT`（409）/ `FAILURE`（见 `enrollment-load.jmx`）。
+
+### 7.3 跑后必须记录的 5 项
+
+1. **成功率**（及建议备注 `QUEUED`/`SOLD_OUT`/`CONFLICT` 占比）。
+2. **P95 / P99**（HTML 报告 Statistics）。
+3. **5xx 是否出现**（计数应为 0）。
+4. **最终库存**：Redis `GET activity:<id>:stock` **≥ 0**；与 DB 逻辑一致。
+5. **重复成功报名**：MySQL 同用户同活动无多条 **`SUCCESS`**；成功数 **≤ MaxCapacity**。
+
+### 7.4 大规模门槛（Sprint 3 强制项）
+
+- 至少尝试 **≥3000** 并发一轮；若未达 **5000**，在报告中写明**环境限制 / 瓶颈**与**实际线程数**（对齐 `docs/SPRINT3.md` §四.5–4.6）。
 

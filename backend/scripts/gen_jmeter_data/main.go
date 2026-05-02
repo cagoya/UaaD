@@ -3,7 +3,7 @@
 // 推荐压测前：go run ./scripts/gen_jmeter_data -count 1000
 //
 // 说明：服务端 /auth/register 有 IP 限流（默认约每分钟 5 次）。批量注册须顺序请求并在 429 时退避；
-// 本地可临时在 .env 设置 REG_RATE_LIMIT_PER_MIN=120、REG_RATE_LIMIT_BURST=30 后重启服务以加快生成。
+// 但本地ip(127.0.0.1, ::1)不进行限流
 package main
 
 import (
@@ -154,8 +154,10 @@ type loginData struct {
 
 type listActivitiesData struct {
 	List []struct {
-		ID     uint64 `json:"id"`
-		Status string `json:"status"`
+		ID            uint64    `json:"id"`
+		Status        string    `json:"status"`
+		EnrollOpenAt  time.Time `json:"enroll_open_at"`
+		EnrollCloseAt time.Time `json:"enroll_close_at"`
 	} `json:"list"`
 }
 
@@ -261,8 +263,14 @@ func pickPublishedActivityID(client *http.Client, base string) (string, error) {
 	}
 	for _, a := range data.List {
 		if strings.EqualFold(a.Status, "PUBLISHED") {
+			now := time.Now()
+			if !a.EnrollOpenAt.IsZero() && !a.EnrollCloseAt.IsZero() {
+				if now.Before(a.EnrollOpenAt) || now.After(a.EnrollCloseAt) {
+					continue // 报名窗口未开放或已关闭
+				}
+			}
 			return fmt.Sprintf("%d", a.ID), nil
 		}
 	}
-	return "", fmt.Errorf("列表中无 PUBLISHED 活动，请先 seed 或创建活动")
+	return "", fmt.Errorf("列表中无报名窗口当前开放的 PUBLISHED 活动，请先创建活动并确认 enroll_open_at/enroll_close_at 覆盖当前时间")
 }
